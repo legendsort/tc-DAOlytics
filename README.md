@@ -29,7 +29,7 @@ Finally, the main script calls plot_network_metrics.py to visualize the clusteri
 -	DIR = Whether directed or undirected networks should be plotted for the network figure
 -	SHOW = Whether plotted figures should be shown
 -	REMOVE_ACCOUNTS = List of account names that should not be considered in the analysis
--	# TODO MERGE_ACCOUNTS = Account names that should be merged
+-	(TODO) MERGE_ACCOUNTS = Account names that should be merged
 -	SEL_RANGE = Time range for selecting messages for the analysis
 -	EMOJI_TYPES = Emoji's to be considered. (set to None for all emojis)
 -	MEN_SUBSTRING = Mentions in messages containing substrings specified in this list are considered only (set to None to consider all messages)
@@ -48,6 +48,7 @@ Finally, the main script calls plot_network_metrics.py to visualize the clusteri
 -	If a person is mentioned in a reply to a message of that same person, the interaction is only counted as reply and not as mention
 -	The script only considers accounts that have sent a message or emoji reaction in at least one of the selected channels.
 -	Files were converted from xlsx to csv using https://cloudconvert.com/
-Data storage
+
+**Data storage**
 The script currently does not store any intermediate data. The script prints the discord user names that are considered in the analysis in the terminal. The figures do not include the identifying numbers that link the discord account names to the nodes in the network.
 
