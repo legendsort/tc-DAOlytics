@@ -14,6 +14,7 @@
 -	Heterogeneity in edge weight distribution (not in notion table but in conceptual framework)
 
 **Description of scripts**
+
 Everything can be run and adjusted through the main_graph_analysis_single_time.py script (referred to as main script from here on). The adjustable variables and their meaning are listed below this section.
 
 The main script first calls compute_network.py to compute an interaction network from the raw discord data. Additional outputs are the total number of interactions per node and the fraction of incoming relative to outgoing interactions for each node. 
@@ -50,5 +51,6 @@ Finally, the main script calls plot_network_metrics.py to visualize the clusteri
 -	Files were converted from xlsx to csv using https://cloudconvert.com/
 
 **Data storage**
+
 The script currently does not store any intermediate data. The script prints the discord user names that are considered in the analysis in the terminal. The figures do not include the identifying numbers that link the discord account names to the nodes in the network.
 
