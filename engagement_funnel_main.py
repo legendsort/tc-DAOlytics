@@ -19,17 +19,23 @@ import pickle
 from matplotlib.lines import Line2D
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
-from collections import Counter
 
 from load_data import load_csv_data
-from compute_network import compute_network
 from assess_arrivals import assess_arrivals
+from compute_network import compute_network
+import assess_engagement
 import plot_engagement_data 
+from plot_network import plot_network_num_interactions
+from compute_metrics import compute_metrics
+from plot_network_metrics import plot_network_metrics
+
 
 
 # # # # # set parameter values # # # # #
 
-DATA_DIR_PATH = "./data/aragon220919/" # path to directory with discord data
+COMMUNITY_ID = "aragon220919" # folder name for loading and saving data
+# COMMUNITY_ID = "test" # folder name for loading and saving data
+DATA_DIR_PATH = "./data/{}/".format(COMMUNITY_ID) # path to directory with discord data
 ARR_CHANNELS = None #["arrivals"] # path to directory/direcotires with arrival data
 CHANNELS = ["ambassadorchat", "anttoken", "bugsfeedback", "communitygeneral", \
 	"communitywellbeing", "daoexpertsgenerl", "daopolls", "data", \
@@ -39,26 +45,26 @@ CHANNELS = ["ambassadorchat", "anttoken", "bugsfeedback", "communitygeneral", \
 	"memespets", "newjoiners", "operationsgeneral", \
 	"questions", "spamreporting", "support", \
 	"tweetsnews"] # names of channels to be used for analysis (should correspond to directories in DATA_DIR_PATH)
+# CHANNELS = ["general_full"]
 TEMP_THREAD_DIR_PATH = "./temp_thread" # path to temporary directory where thread data from all channels will be combined
 
 DIR = True # whether directed or undirected networks should be created for plotting the network
-SHOW = [True, True] # whether plotted figures should be shown
+SHOW = [True, True, True, True, True] # whether plotted figures should be shown
 REMOVE_ACCOUNTS = ["Aragon🦅 Blog#0000", "Aragon🦅 Twitter#0000"] # list of account names that should not be considered in the analysis
 MERGE_ACCOUNTS = [] # list of tuples with account names that should be merged (only first name in tuple remains)
-SEL_RANGE = ['22/04/01 00:00:00', '22/09/18 00:00:00'] # range of dates and times to include in analysis ('yy/mm/dd HH:MM:SS')
-WINDOW_D = 7
-STEP_D = 1
+SEL_RANGE = ['22/08/01 00:00:00', '22/09/18 00:00:00'] # range of dates and times to include in analysis ('yy/mm/dd HH:MM:SS')
+WINDOW_D = 7 # duration of sliding window (days)
+STEP_D = 1 # step size of sliding window (days)
 
-INT_THR = 1 # minimum number of interactions to be active					Default = 
-UW_DEG_THR = 1 # minimum number of accounts interacted with to be active	Default = 
-PAUSED_T_THR = 2 # time period to remain paused								Default = 
-CONT_T_THR = 2 # time period to be continously active						Default = 
-EDGE_STR_THR = 5 # minimum number of interactions for connected				Default = 
-UW_THR_DEG_THR = 5 # minimum number of accounts for connected				Default = 
-CORE_T_THR = 5 # time period to assess for core								Default = 
-CORE_O_THR = 3 # times to be connected within CORE_T_THR to be core			Default =
+INT_THR = 1 # minimum number of interactions to be active					Default = 1
+UW_DEG_THR = 1 # minimum number of accounts interacted with to be active	Default = 1
+PAUSED_T_THR = 2 # time period to remain paused								Default = 2
+CONT_T_THR = 2 # time period to be continously active						Default = 2
+EDGE_STR_THR = 5 # minimum number of interactions for connected				Default = 5
+UW_THR_DEG_THR = 5 # minimum number of accounts for connected				Default = 5
+CORE_T_THR = 5 # time period to assess for core								Default = 5
+CORE_O_THR = 3 # times to be connected within CORE_T_THR to be core			Default = 3
 
-PLOT_MEM_TYPE = "" #""  # "core"  # "discovering"  # "engaged" 
 INT_TYPE = "all" # "in"  "out"  "all"
 RAND = False
 
@@ -72,13 +78,12 @@ REPLY_SUBSTRING = None # replies containing substrings specified in this list ar
 
 INTERACTION_WEIGHTS = [1,1,1,1] # relative weight of mentions, reactions, replies and threads
 
-N_BINS = 10
-
-NODE_CLUS_MAX = 1
-NODE_SP_MAX = 4
-NODE_BETW_MAX = 0.1
-EDGE_W_MAX = 60
-NODE_D_MAX = 20
+FIG_TYPE = "in-out" # whether network nodes should be colored based on in-out fraction ("in-out") or clustering ("clusters")
+NODE_MULT = 15 # node multiplication for plotting
+EDGE_MULT = 1 # edge multiplication for plotting
+NODE_LEG_VALS = [5, 100, 500] # values to plot for node legend
+EDGE_LEG_VALS = [1, 10, 50] # values to plot for edge legend
+NODE_POS_SCALE = 0.1 # location scale multiplication for plotting
 
 # # # # # main function # # # # # 
 
@@ -164,6 +169,16 @@ def main(args):
 	n_returned = np.zeros(last_start.days+1)
 	n_new_active = np.zeros(last_start.days+1)
 	
+	net_decen = np.zeros(last_start.days+1)
+	sw = np.zeros(last_start.days+1)
+	node_clus_av = np.zeros(last_start.days+1)
+	node_sp_av = np.zeros(last_start.days+1)
+	node_betw_av = np.zeros(last_start.days+1)
+	num_edge = np.zeros(last_start.days+1)
+	num_node = np.zeros(last_start.days+1)
+	edge_dens = np.zeros(last_start.days+1)
+		
+	
 	# initiate empty result libraries
 	all_arrived = {}
 	all_continous = {}
@@ -179,6 +194,13 @@ def main(args):
 	all_disengaged = {}
 	all_unpaused = {}
 	all_returned = {}
+	
+	node_clus = {}
+	node_sp = {}
+	node_betw = {}
+	edge_weights = {}
+	lc_nodes = {}
+	
 	
 	# initiate empty result arrays for tick labels
 	date_tick_i = []
@@ -226,249 +248,60 @@ def main(args):
 		
 		
 		# # # NETWORK # # #
-					
-		# compute network	
+	
+		# compute network for this time window
 		total_graph, men_graph, react_graph, reply_graph, thread_graph, acc_names = \
 			compute_network(data, DIR, REMOVE_ACCOUNTS, MERGE_ACCOUNTS, \
 			t_sel_range_str, EMOJI_TYPES, MEN_SUBSTRING, REACT_SUBSTRING, REPLY_SUBSTRING, \
 			INTERACTION_WEIGHTS, TEMP_THREAD_DIR_PATH)	
 			
-		
-		# # # SEPARATE IN AND OUT INTERACTIONS # # #
 				
-		# compute number of ingoing interactions
-		int_in = ((total_graph[2]+1)/2) * total_graph[1] 
+		# # # ENGAGEMENT # # #
 		
-		# compute number of outgoing interactions
-		int_out = total_graph[1] - int_in
+		# compute engagement levels for this time window
+		[n_arrived, n_continous, n_core, n_non_core, n_active, n_connected, \
+			n_periphery, n_paused, n_new_disengaged, n_disengaged, n_unpaused, \
+			n_returned, n_new_active, all_arrived, all_continous, all_core, \
+			all_non_core, all_active, all_connected, all_periphery, all_paused, \
+			all_new_disengaged, all_disengaged, all_unpaused, all_returned, \
+			all_new_active] = assess_engagement.assess_engagement(total_graph, w_i, \
+			acc_names, INT_TYPE, INT_THR, UW_DEG_THR, EDGE_STR_THR, UW_THR_DEG_THR, \
+			CONT_T_THR, CORE_T_THR, CORE_O_THR, PAUSED_T_THR, WINDOW_D,\
+			n_arrived, n_continous, n_core, n_non_core, n_active, n_connected, \
+			n_periphery, n_paused, n_new_disengaged, n_disengaged, n_unpaused, \
+			n_returned, n_new_active, all_arrived, all_continous, all_core, \
+			all_non_core, all_active, all_connected, all_periphery, all_paused, \
+			all_new_disengaged, all_disengaged, all_unpaused, all_returned, \
+			all_new_active)
 		
-		if INT_TYPE == "in":
-			int_analysis = int_in
-		elif INT_TYPE == "out":
-			int_analysis = int_out
-		elif INT_TYPE == "all":
-			int_analysis = total_graph[1]
-		else:
-			print("ERROR: Set INT_TYPE to 'in', 'out' or 'all'")
-			return
+		
+		# # # NETWORK METRICS # # #
+		
+		# # compute network metrics for this time window
+		# [node_clus[str(w_i)], node_sp[str(w_i)], node_betw[str(w_i)], \
+			# net_decen[w_i], sw[w_i], edge_weights[str(w_i)], lc_nodes[str(w_i)]] = \
+			# compute_metrics(total_graph[0])
+		
+		# # compute number of edges and nodes for this time window and store
+		# num_edge[w_i] = len(edge_weights[str(w_i)])
+		# num_node[w_i] = len(lc_nodes[str(w_i)])		
+		# edge_dens[w_i] = 100 * (num_edge[w_i] / (0.5 * num_node[w_i] * (num_node[w_i] - 1)))	
+	
+		# # store average node metrics for engagement subtypes
+		# [node_clus_av, node_sp_av, node_betw_av] = store_av_metrics_engagement_subset(\
+			# all_core, acc_names, lc_nodes, w_i, node_clus, node_sp, node_betw, \
+			# node_clus_av, node_sp_av, node_betw_av)
+		
+		# # store average node metrics for engagement subtypes
+		# [node_clus_av, node_sp_av, node_betw_av] = store_av_metrics_engagement_subset(\
+			# all_non_core, acc_names, lc_nodes, w_i, node_clus, node_sp, node_betw, \
+			# node_clus_av, node_sp_av, node_betw_av)
 			
-		
-		# # # THRESHOLD INTERACTIONS # # #
-					
-		# # weighted degree
-		
-		# compare total weighted node degree to interaction threshold
-		thr_ind = np.where(int_analysis > INT_THR)[0]
-		
-		# # unweighted degree
-		
-		# get unweighted node degree value for each node
-		all_degrees = np.array([val for (node, val) in total_graph[0].degree()])
-		
-		# compare total unweighted node degree to interaction threshold
-		thr_uw_deg = np.where(all_degrees > UW_DEG_THR)[0]
-		
-		# # thresholded unweighted degree
-		
-		# make copy of graph for thresholding
-		thresh_graph = total_graph[0]
-		
-		# remove edges below threshold from copy
-		thresh_graph.remove_edges_from([(n1, n2) for n1, n2, w in thresh_graph.edges(data="weight") if w < EDGE_STR_THR])
-		
-		# get unweighted node degree value for each node from thresholded network
-		all_degrees_thresh = np.array([val for (node, val) in thresh_graph.degree()])
-		
-		# compare total unweighted node degree after thresholding to threshold
-		thr_uw_thr_deg = np.where(all_degrees_thresh > UW_THR_DEG_THR)[0]
-		
-		
-		# # # ACTIVE # # #
-		
-		# # obtain accounts that meet both weigthed and unweighted degree thresholds
-		thr_overlap = np.intersect1d(thr_ind, thr_uw_deg)
-		
-		# store number of accounts above threshold
-		n_active[w_i] = len(thr_overlap)
-		
-		# obtain active account names in this period and store in dictionary
-		all_active[str(w_i)] = acc_names[thr_overlap]
-		
-		
-		# # # CONNECTED # # #
-		
-		# # store number of accounts above thresholded unweighted degree threshold
-		n_connected[w_i] = len(thr_uw_thr_deg)
-		
-		# obtain connected account names in this period and store in dictionary
-		all_connected[str(w_i)] = acc_names[thr_uw_thr_deg]
-		
-		
-		# # # PERIPHERY # # #
-		
-		# store number remaining account names in periphery
-		all_periphery[str(w_i)] = set(all_active[str(w_i)])-set(all_connected[str(w_i)])
-				
-		# store number remaining account names in periphery
-		n_periphery[w_i] = len(all_periphery[str(w_i)])
-		
-			
-		# # # CONTINUOUSLY ACTIVE # # #
-		
-		# if there are more time periods in the past than CONT_T_THR
-		if w_i-(CONT_T_THR-1)*WINDOW_D >= 0:
-		
-			# obtain who was continously active in all specified time periods
-			all_continous[str(w_i)] = check_past(all_active, CONT_T_THR, CONT_T_THR, WINDOW_D)
-		
-		else:
-			
-			# store empty set 
-			all_continous[str(w_i)] = set("")
-			
-		# store nubmer of engaged members
-		n_continous[w_i] = len(all_continous[str(w_i)])
-			
-		
-		
-		# # # CORE # # #
-		
-		# if there are more time periods in the past than CONT_T_THR
-		if w_i-CORE_T_THR*WINDOW_D >= 0:
-				
-			# obtain who was connected in all specified time periods and was engaged
-			all_core[str(w_i)] = set(check_past(all_connected, CORE_T_THR, CORE_O_THR, WINDOW_D))
-		
-		else:
-			
-			# store empty set 
-			all_core[str(w_i)] = set("")
-						
-		# store number of core members
-		n_core[w_i] = len(all_core[str(w_i)])
-			
-		
-		# # # NON CORE # # #
-		
-		# store remaining account names in non core
-		all_non_core[str(w_i)] = set(all_active[str(w_i)])-set(all_core[str(w_i)])
-		
-		# store number remaining account names in non core
-		n_non_core[w_i] = len(all_non_core[str(w_i)])
-			
-						
-		# # ASSESS ENGAGEMENT LEVEL # # # 		
-					
-		# if data from previous period is available
-		if w_i-WINDOW_D >= 0:
-			
-			# check if there is paused data from previous period and otherwise make empty set
-			temp_set_paused = check_prev_period(all_paused, str(w_i-WINDOW_D))
-			
-			# check if there is disengaged data from previous period and otherwise make empty set
-			temp_set_disengaged = check_prev_period(all_disengaged, str(w_i-WINDOW_D))
-			
-			# check if there is unpaused data from previous period and otherwise make empty set
-			temp_set_unpaused = check_prev_period(all_unpaused, str(w_i-WINDOW_D))
 
-				
-			# # # NEWLY ACTIVE # # #
-			
-			# obtain members active in this window that were not active, paused or disengaged WINDOW_D days ago
-			all_new_active[str(w_i)] = set(all_active[str(w_i)])-set(all_active[str(w_i-WINDOW_D)]) - temp_set_paused - temp_set_disengaged - temp_set_unpaused
-			
-			# store number of new joiners
-			n_new_active[w_i] = len(all_new_active[str(w_i)])
-			
-			
-			# # # PAUSED (1 of 2)# # #
-			
-			# obtain members that were active WINDOW_D days ago but are not active in this window
-			new_paused = set(all_active[str(w_i-WINDOW_D)])-set(all_active[str(w_i)])			
-			
-			# add newly paused members to paused members from previous period
-			temp_currently_paused = new_paused.union(temp_set_paused)
-			
-			# create temporary empty set result (will be updated in part 2 of 2)
-			all_paused[str(w_i)] = set("")
-			
-											
-			# if data from previous previous period is available
-			if w_i-2*WINDOW_D >= 0:
-				
-				
-				# # # UNPAUSED # # #
-								
-				# obtain account names active now but paused WINDOW_D days ago
-				all_unpaused[str(w_i)] = set(all_paused[str(w_i-WINDOW_D)]).intersection(all_active[str(w_i)])
-				
-				# store number of unpaused
-				n_unpaused[w_i] = len(all_unpaused[str(w_i)])
-				
-				# remove unpaused from currently paused
-				temp_currently_paused = temp_currently_paused - all_unpaused[str(w_i)]
-				
-				
-				# # # RETURNED # # #
-				
-				# if there is disengaged data for this time period
-				if str(w_i-WINDOW_D) in all_disengaged.keys():
-
-					# obtain account names active now but disengaged WINDOW_D days ago	
-					all_returned[str(w_i)] = set(all_disengaged[str(w_i-WINDOW_D)]).intersection(all_active[str(w_i)])
-					
-				else:
-					
-					# store empty set for returned
-					all_returned[str(w_i)] = set("")
-					
-				# count number of returned accounts
-				n_returned[w_i] = len(all_returned[str(w_i)])
-						
-					
-				# # # DISENGAGED # # #
-				
-				# obtain account names that were continuously paused for PAUSED_T_THR periods
-				cont_paused = check_past(all_paused, PAUSED_T_THR+1, PAUSED_T_THR, WINDOW_D)
-				
-				# obtain account names that were continuously paused and are still not active
-				all_new_disengaged[str(w_i)] = cont_paused.intersection(temp_currently_paused)
-				
-				# add newly disengaged members to disengaged members from previous period
-				temp_currently_disengaged = all_new_disengaged[str(w_i)].union(temp_set_disengaged) 
-
-				# remove returned accounts from disengaged accounts and store
-				all_disengaged[str(w_i)] = temp_currently_disengaged - all_returned[str(w_i)]
-				
-				# store number of disengagers
-				n_disengaged[w_i] = len(all_disengaged[str(w_i)])
-				n_new_disengaged[w_i] = len(all_new_disengaged[str(w_i)])
-				
-				# remove disengaged accounts from paused accounts
-				temp_currently_paused = temp_currently_paused - all_disengaged[str(w_i)]
-				
-			
-			# # # PAUSED (2 of 2) # # #
-			
-			# store currently paused accounts
-			all_paused[str(w_i)] = temp_currently_paused
-			
-			# store number of paused accounts
-			n_paused[w_i] = len(all_paused[str(w_i)])
-			
-		else:
-			
-			# set all active members to newly active
-			all_new_active[str(w_i)] = set(all_active[str(w_i)])
-			
-			# store number of new joiners
-			n_new_active[w_i] = len(all_new_active[str(w_i)])	
-							
-									
-	# # # SAVE RESULTS # # # 
+	# # SAVE RESULTS # # # 
 	
 	# save results as pkl files for internal loading
-	with open('./engagement_funnel_data.pkl', 'wb') as f:
+	with open('./engagement_funnel_data_new.pkl', 'wb') as f:
 		pickle.dump([n_arrived, n_continous, n_core, n_non_core, n_active, \
 		n_connected, n_periphery, n_paused, n_new_disengaged, n_disengaged, n_unpaused, n_returned, \
 		n_new_active, all_arrived, all_continous, all_core, all_non_core, \
@@ -490,11 +323,11 @@ def main(args):
 	
 	print(".csv variables saved")
 	
-						
+			
 	# # # PLOT RESULTS FOR ACTIVE MEMBERS # # #
 	
 	# make save path for active member figure (set to None for figure not to be saved)
-	ac_mem_save_path = "./results/figures/Aragon_engagement_active_members_rand{}".format(int(RAND)) # exclude .png in name
+	ac_mem_save_path = None #"./results/figures/Aragon_engagement_active_members_rand{}".format(int(RAND)) # exclude .png in name
 	
 	# plot results
 	plot_engagement_data.plot_active_members(all_active, all_connected, \
@@ -506,90 +339,67 @@ def main(args):
 	# # # PLOT RESULTS FOR INACTIVATING MEMBERS # # #
 	
 	# make save path for active member figure (set to None for figure not to be saved)
-	inac_mem_save_path = "./results/figures/Aragon_engagement_inactivating_members_rand{}".format(int(RAND)) # exclude .png in name
+	inac_mem_save_path = None #"./results/figures/Aragon_engagement_inactivating_members_rand{}".format(int(RAND)) # exclude .png in name
 	
 	# plot results
 	plot_engagement_data.plot_inactive_members(all_active, all_connected, \
 		all_paused, all_core, all_new_disengaged, all_new_active, all_unpaused, \
 		all_returned, all_continous, PAUSED_T_THR, date_tick_i, date_tick_labels, \
 		PER_TABLE, WINDOW_D, RAND, SHOW[1], inac_mem_save_path) 	
-
-
-# # # OTHER FUNCTIONS # # #
-
-def check_prev_period(engagement_dict, time_str):
-	"""
-	Checks if values are present in specific previous period of dict
-	
-	Input:
-	engagement_dict - {str : set} : dictionary with account names sets  
-		as values for periods indicated as keys
-	time_str - str : dictionary key of interest
-	
-	Output:
-	temp_set - set : either the set that is the value for the time_str 
-		key or and empty set		
-	"""
-			
-	# if engagement_dict contains data for time_str
-	if time_str in engagement_dict.keys():
-		temp_set = set(engagement_dict[time_str]) 
-	else:
-		temp_set = set("")
-			
-	return temp_set
-	
-				
-# # #
-
-def check_past(data_dic, t_thr, o_thr, WINDOW_D):
-	"""
-	Checks in how many previous periods account names were in a dict
-	
-	Input:
-	data_dic - {str : set} : dictionary with account name sets to check
-	t_thr - int : number of time period into the past to consider
-	o_thr - int : minimal number of occurences of account name within 
-		the period specified by t_thr
-	WINDOW_D - int : width of an analysis window in number of days
-	
-	Output:
-	acc_selection - [str] : all accounts that were present in data_dic
-		for more than o_thr times within the last t_thr periods
-	"""
-	
-	# initiate empty result list
-	acc_per_period = [None]*t_thr
-			
-	# obtain dictionary keys
-	dic_keys = list(data_dic.keys())
 		
-	# for each period that should be considered
-	for p in range(t_thr):
 		
-		# if time period is present in dic_keys
-		if len(dic_keys) >= -(-1-(p*WINDOW_D)):
-								
-			# obtain accounts in period
-			acc_per_period[p] = list(data_dic[str(dic_keys[-1-(p*WINDOW_D)])])
+	# # # PLOT RATIO OF UNPAUSING MEMBERS # # #
+	
+	# make save path for active member figure (set to None for figure not to be saved)
+	unp_mem_save_path = None #"./results/figures/Aragon_engagement_unpaused_member_ratio_cut.png"
+	
+	plot_engagement_data.plot_unpaused_score(n_unpaused, n_new_disengaged, \
+		date_tick_i, date_tick_labels, SHOW[2], unp_mem_save_path)
+
+
+	# # # PLOT FIGURE OF NETWORK # # #
+	
+	# make save path for network figure (set to None for figure not to be saved)
+	net_fig_save_path = None #"./results/figures/Aragon_network_fig.png"
 			
-		else:
-			
-			# store empty values
-			acc_per_period[p] = list("")
+	# create network figure
+	plot_network_num_interactions(total_graph, men_graph, react_graph, reply_graph, \
+		thread_graph, acc_names, DIR, SHOW[3], NODE_MULT, EDGE_MULT, NODE_LEG_VALS, \
+		EDGE_LEG_VALS, NODE_POS_SCALE, FIG_TYPE, net_fig_save_path)
 	
-	# merge values in list of list into single list
-	all_acc_list = [elem for sublist in acc_per_period for elem in sublist]
+		
+	# # # MAKE FIGURE OF NETWORK METRICS # # #
 	
-	# count number of occurences in list per account
-	acc_cnt_dict = Counter(all_acc_list)
+	# make save path for network metrics figure (set to None for figure not to be saved)
+	net_met_fig_save_path = None #"./results/figures/Aragon_network_metrics_fig.png"
 	
-	# obtain account names that with at least o_thr occurences in all_acc_list
-	acc_selection = set([acc for acc, occurrences in acc_cnt_dict.items() if occurrences >= o_thr])
+	# create network metrics figure
+	net_metrics_fig = plot_network_metrics(node_clus, node_sp, node_betw, \
+		sw, edge_dist, total_graph[1][list(lc_nodes)], total_graph[2][list(lc_nodes)], \
+		SHOW[4], net_met_fig_save_path)	
+		
+		
+		
+# # # # # OTHER FUNCTIONS # # # # #
 
-	return acc_selection
+def store_av_metrics_engagement_subset(comparison, acc_names, lc_nodes, w_i, node_clus, node_sp, \
+	node_betw, node_clus_av, node_sp_av, node_betw_av):
+		
+	# obtain all account names of lc_nodes
+	lc_acc_names = acc_names[list(lc_nodes[str(w_i)])]
+	
+	# obtain account names in comparison and in lc
+	overlap_i = [i for i, val in enumerate(lc_acc_names) if val in comparison[str(w_i)]]
+	
+	# compute average of metrics and store
+	node_clus_av[w_i] = np.average(node_clus[str(w_i)][overlap_i])
+	node_sp_av[w_i] = np.average(node_sp[str(w_i)][overlap_i])
+	node_betw_av[w_i] = np.average(node_betw[str(w_i)][overlap_i])
+
 	
 
-
+	return [node_clus_av, node_sp_av, node_betw_av]
+	
+	
 if __name__ == '__main__':
 	sys.exit(main(sys.argv))
