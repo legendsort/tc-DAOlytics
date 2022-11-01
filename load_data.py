@@ -12,6 +12,7 @@ import os
 import csv
 import shutil
 import numpy as np
+from datetime import datetime
 
 
 def load_csv_data(CHANNELS, DATA_DIR_PATH, TEMP_THREAD_DIR_PATH):
@@ -51,12 +52,44 @@ def load_csv_data(CHANNELS, DATA_DIR_PATH, TEMP_THREAD_DIR_PATH):
 		elif len(file_name) > 1:
 			print("ERROR more than one .csv file in {}. Only using first entry: {}".format(DATA_DIR_PATH + channel, file_name[0]))
 		
+		
+		# set error count to 0
+		error_count = 0		
+							
 		# if this is the first channel that is loaded
 		if i == 0:
-			
+					
 			# load channel data into numpy array
 			with open(DATA_DIR_PATH + channel + "/" + file_name[0], 'r') as x:
-				data = np.array(list(csv.reader(x, delimiter=",")),dtype=object)
+				
+				# # store results
+				# data = np.array(list(csv.reader(x, delimiter=",")),dtype=object)
+				
+				chan_data_obj = csv.reader(x, delimiter=",")
+				
+				# add content to array in less efficient way (TEMPORARY SOLUTION)
+				for j, line in enumerate(chan_data_obj):
+																												
+					# if the line is not the right size (likely "," in messages cause errors) and not the header
+					if len(line) != 10:
+						line = line[0].split(",")
+					
+					if len(line) == 10:	
+					
+						# if this is the header	
+						if j == 0:
+						
+							# intiate data array with line
+							data = np.array(line)
+													
+						else:
+								
+							# add line to data array
+							data = np.vstack((data, np.array(line)))
+							
+					else:
+						
+						error_count += 1
 			
 		else:
 			
@@ -69,22 +102,40 @@ def load_csv_data(CHANNELS, DATA_DIR_PATH, TEMP_THREAD_DIR_PATH):
 							
 				# append chan_data without header to data numpy array
 				data = np.vstack((data, chan_data[1:,:]))
-			
+							
 			# if data in csv file is depricated
 			except:
 				
 				# load channel data into numpy array
 				with open(DATA_DIR_PATH + channel + "/" + file_name[0], 'r') as x:
+					
 					chan_data_obj = csv.reader(x, delimiter=",")
 				
 					# add content to array in less efficient way (TEMPORARY SOLUTION)
-					for i, line in enumerate(chan_data_obj):
-												
-						# if the line is the right size (likely "," in messages cause errors) and not the header
-						if len(line) == data.shape[1] and i != 0:
+					for j, line in enumerate(chan_data_obj):
+						
+						# if the line is not the right size (likely "," in messages cause errors)
+						if len(line) != data.shape[1]:
+							line = line[0].split(",")
+						
+						# if the line is the right size (likely "," in messages cause errors)
+						if len(line) == data.shape[1]:	
+						
+							# if this is not the header	
+							if j != 0:
 							
-							# store data of line
-							data = np.vstack((data, np.array(line)))
+								# add line to data array
+								data = np.vstack((data, np.array(line)))
+								
+						else:
+							
+							error_count += 1
+						
+		
+		
+		# print error count
+		print("{} messages could not be loaded".format(error_count))
+		
 		
 		# if there is thread data for this channel
 		if os.path.exists(DATA_DIR_PATH + channel + "/threads"):

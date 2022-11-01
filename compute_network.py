@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  plot_network.py
+#  compute_network.py
 #  
 #  Author Ene SS Rawa / Tjitse van der Molen  
  
@@ -106,13 +106,13 @@ def compute_network(data, DIR, REMOVE_ACCOUNTS, MERGE_ACCOUNTS, SEL_RANGE, \
 			if (MEN_SUBSTRING == None) or (any([ss in mess_cont[0] for ss in MEN_SUBSTRING])):
 				
 				# update mention matrix
-				men_mat = update_mention_matrix(men_mat, aut_i, data[mess_i,np.where(data[0,:]=="User_Mentions")], acc_names, DIR) 
+				men_mat, _ = update_mention_matrix(men_mat, aut_i, data[mess_i,np.where(data[0,:]=="User_Mentions")], acc_names, DIR) 
 			
 			# if message contains specified substring (or None are specified)
 			if (REACT_SUBSTRING == None) or (any([ss in mess_cont[0] for ss in REACT_SUBSTRING])):
 						
 				# update emoji reaction matrix
-				react_mat = update_react_matrix(react_mat, aut_i, data[mess_i,np.where(data[0,:]=="Reactions")], acc_names, DIR, EMOJI_TYPES) 
+				react_mat, _ = update_react_matrix(react_mat, aut_i, data[mess_i,np.where(data[0,:]=="Reactions")], acc_names, DIR, EMOJI_TYPES) 
 			
 		# if message is reply
 		if data[mess_i,np.where(data[0,:]=="Type")] == "REPLY":
@@ -121,19 +121,19 @@ def compute_network(data, DIR, REMOVE_ACCOUNTS, MERGE_ACCOUNTS, SEL_RANGE, \
 			if (REPLY_SUBSTRING == None) or (any([ss in mess_cont[0] for ss in REPLY_SUBSTRING])):
 				
 				# update reply matrix
-				reply_mat = update_reply_matrix(reply_mat, aut_i, data[mess_i,np.where(data[0,:]=="Replied_User")][0][0], acc_names, DIR) 
+				reply_mat, _ = update_reply_matrix(reply_mat, aut_i, data[mess_i,np.where(data[0,:]=="Replied_User")][0][0], acc_names, DIR) 
 			
 			# if message contains specified substring (or None are specified)
 			if (MEN_SUBSTRING == None) or (any([ss in mess_cont[0] for ss in MEN_SUBSTRING])):
 				
 				# update mention matrix (reply interactor is excluded)
-				men_mat = update_mention_matrix(men_mat, aut_i, data[mess_i,np.where(data[0,:]=="User_Mentions")], acc_names, DIR, data[mess_i,np.where(data[0,:]=="Replied_User")][0][0]) 
+				men_mat, _ = update_mention_matrix(men_mat, aut_i, data[mess_i,np.where(data[0,:]=="User_Mentions")], acc_names, DIR, data[mess_i,np.where(data[0,:]=="Replied_User")][0][0]) 
 				
 			# if message contains specified substring (or None are specified)
 			if (REACT_SUBSTRING == None) or (any([ss in mess_cont[0] for ss in REACT_SUBSTRING])):
 					
 				# update emoji reaction matrix
-				react_mat = update_react_matrix(react_mat, aut_i, data[mess_i,np.where(data[0,:]=="Reactions")], acc_names, DIR)
+				react_mat, _ = update_react_matrix(react_mat, aut_i, data[mess_i,np.where(data[0,:]=="Reactions")], acc_names, DIR)
 	
 		
 	# # # CONSTRUCT MATRIX FOR THREADS # # #
@@ -146,10 +146,11 @@ def compute_network(data, DIR, REMOVE_ACCOUNTS, MERGE_ACCOUNTS, SEL_RANGE, \
 	
 	# obtain file names of all csv files
 	thread_files = [j for j in dir_names if ".csv" in j]
-		
+	
+	
 	# for each thread file
 	for thr_file in thread_files:
-		
+				
 		# # load thread data into numpy array
 		# with open(TEMP_THREAD_DIR_PATH + "/" + thr_file, 'r') as x:
 			# thr_data = np.array(list(csv.reader(x, delimiter=",")))
@@ -158,10 +159,10 @@ def compute_network(data, DIR, REMOVE_ACCOUNTS, MERGE_ACCOUNTS, SEL_RANGE, \
 		# load channel data into numpy array
 		with open(TEMP_THREAD_DIR_PATH + "/" + thr_file, 'r') as x:
 			chan_data_obj = csv.reader(x, delimiter=",")
-				
+							
 			# add content to array in less efficient way (TEMPORARY SOLUTION)
 			for i, line in enumerate(chan_data_obj):
-				
+								
 				# if line is the header
 				if i == 0:
 					
@@ -170,18 +171,30 @@ def compute_network(data, DIR, REMOVE_ACCOUNTS, MERGE_ACCOUNTS, SEL_RANGE, \
 						
 					# extract number of columns for appending data
 					num_col = len(thr_data)
+				
+				else:
 																
-				# if the line is the right size (likely "," in messages cause errors) and not the header
-				elif len(line) == num_col and i != 0:
+					# if the line is the right size (likely "," in messages cause errors) and not the header
+					if len(line) == num_col and i != 0:
 							
-					# store data of line
-					thr_data = np.vstack((thr_data, np.array(line)))
+						# store data of line
+						thr_data = np.vstack((thr_data, np.array(line)))
 		
+					else:
+						
+						line = line[0].split(",")
+						
+						# if the line is the right size (likely "," in messages cause errors) and not the header
+						if len(line) == num_col and i != 0:
+							
+							# store data of line
+							thr_data = np.vstack((thr_data, np.array(line)))
+						
 			
 		# if data only contains one message 
 		if len(thr_data.shape) < 2:
 			
-			print(thr_data)
+			print("Thread had no data")
 			
 			# skip this itteration
 			continue
@@ -217,7 +230,7 @@ def compute_network(data, DIR, REMOVE_ACCOUNTS, MERGE_ACCOUNTS, SEL_RANGE, \
 		thread_mat = update_thread_matrix(thread_mat, acc_names, thr_acc_names, \
 			thr_mess_authors, thr_reacts_per_acc, thr_emoji_authors, thr_mens_per_acc, thr_men_accounts)
 			
-								
+									
 	# # # MERGE SPECIFIED ACCOUNTS # # #
 	
 	# for each merge
@@ -253,13 +266,6 @@ def compute_network(data, DIR, REMOVE_ACCOUNTS, MERGE_ACCOUNTS, SEL_RANGE, \
 	# make weighted sum of all matrices (mentions, reactions, replies and threads)
 	total_mat = INTERACTION_WEIGHTS[0] * men_mat + INTERACTION_WEIGHTS[1] \
 		* react_mat + INTERACTION_WEIGHTS[2] * reply_mat + INTERACTION_WEIGHTS[3] * thread_mat
-	
-	# # shuffle total mat
-	# flat_mat = total_mat.flatten()
-	# np.random.shuffle(flat_mat)
-	# total_mat = np.reshape(flat_mat, np.shape(total_mat))
-	
-	
 		
 	# store all matrices as graphs
 	men_graph = make_graph(men_mat,DIR)
@@ -268,37 +274,6 @@ def compute_network(data, DIR, REMOVE_ACCOUNTS, MERGE_ACCOUNTS, SEL_RANGE, \
 	thread_graph = make_graph(thread_mat,DIR)
 	total_graph = make_graph(total_mat,DIR)
 	
-	# # make random graph based on values from  original graph
-	# rand_graph = nx.gnm_random_graph(total_graph.number_of_nodes(), total_graph.number_of_edges(), seed=1, directed=DIR)
-	
-	# # obtain edges of original graph
-	# edges = total_graph.edges(data=True)		
-	
-	# # obtain weights of original graph and shuffle them
-	# edge_weigths = dict( (x[:-1], x[-1]["weight"]) for x in edges if "weight" in x[-1] )
-	# shuffled_weights = np.asarray(list(edge_weigths.values()))
-	# np.random.shuffle(shuffled_weights)
-		
-	# # add weights to random graph
-	# # for i,e in enumerate(rand_graph.edges()):
-		# # rand_graph[e[0]][e[1]] = shuffled_weights[i]
-    
-    # # store edge values as dictionary
-    
-    # # add edge values to graph
-	# nx.set_edge_attributes(rand_graph, values = shuffled_weights, name = 'weight')
-    
-    # # make random graph the total_graph
-	# total_graph = rand_graph
-    
-	# print(total_graph)
-	# print(total_graph.edges(data = True))
-    
-	# # turn back into matrix
-	# total_mat = nx.to_numpy_matrix(total_graph)
-	
-	# print(total_mat)	
-	# print(np.sum(total_mat))
 		
 	# # # COUNT NUMBER OF INTERACTIONS PER ACCOUNT # # #
 		
@@ -308,7 +283,7 @@ def compute_network(data, DIR, REMOVE_ACCOUNTS, MERGE_ACCOUNTS, SEL_RANGE, \
 	[sum_reply, in_frac_reply] = in_out_dir(reply_mat,DIR)
 	[sum_thread, in_frac_thread] = in_out_dir(thread_mat,DIR)
 	[sum_total, in_frac_total] = in_out_dir(total_mat,DIR)
-		
+			
 	return [(total_graph, sum_total, in_frac_total), (men_graph, sum_men, in_frac_men), \
 		(react_graph, sum_react, in_frac_react), (reply_graph, sum_reply, in_frac_reply), \
 		(thread_graph, sum_thread, in_frac_thread), acc_names]
@@ -330,10 +305,10 @@ def select_messages_time(data, SEL_RANGE):
 		considered for downstream analysis (messages sent during times
 		outside of SEL_RANGE are removed)
 	"""
-		
-	# extract message creation times
-	mess_times = data[1:,np.where(data[0,:]=="Created_At")].astype(int)
 	
+	# extract message creation times
+	mess_times = data[1:,np.where(data[0,:]=="Created_At")[0][0]].astype(int)
+		
 	# convert selection range dates to time
 	sel_start = datetime.strptime(SEL_RANGE[0], '%y/%m/%d %H:%M:%S')
 	sel_end = datetime.strptime(SEL_RANGE[1], '%y/%m/%d %H:%M:%S')
@@ -343,15 +318,15 @@ def select_messages_time(data, SEL_RANGE):
 	
 	# for each message time
 	for i,t in enumerate(mess_times):
-		
+			
 		# convert to date time format and add to list
-		mess_date_time = datetime.fromtimestamp(t[0][0]/1000)
+		mess_date_time = datetime.fromtimestamp(t/1000)
 		
 		# if message was sent within specified range
 		if (mess_date_time >= sel_start) & (mess_date_time < sel_end):
 			
 			# store index of message for analysis
-			mess_indices = np.append(mess_indices, i+1)
+			mess_indices = np.append(mess_indices, i+1) # +1 to account for header row in data
 	
 	# change to integer array
 	mess_indices = mess_indices.astype('int')
@@ -503,7 +478,11 @@ def update_mention_matrix(mat, author_i, all_mentioned, acc_names, directed, not
 	
 	Output:
 	mat - np.array: updated interaction matrix
+	n_int - int: number of interactions added to matrix
 	"""
+	
+	# set number of interactions to 0
+	n_int = 0
 	
 	# split interactors (comma separated)
 	mentioned_split = all_mentioned[0][0].split(",")
@@ -525,8 +504,11 @@ def update_mention_matrix(mat, author_i, all_mentioned, acc_names, directed, not
 					mat[max([author_i, mentioned_i]), min([author_i, mentioned_i])] += 1
 				else:
 					mat[author_i, mentioned_i] += 1
-			
-	return mat
+				
+				# add 1 to number of interactions
+				n_int += 1
+				
+	return mat, n_int
 	
 # # #
 
@@ -544,8 +526,12 @@ def update_react_matrix(mat, author_i, all_reactors, acc_names, directed, emoji_
 	
 	Output:
 	mat - np.array: updated interaction matrix
+	n_int - int: number of interactions added to matrix
 	"""
 		
+	# set number of interactions to 0
+	n_int = 0
+	
 	# split interactors (& separated)
 	first_split = all_reactors[0][0].split("&")
 	
@@ -574,9 +560,12 @@ def update_react_matrix(mat, author_i, all_reactors, acc_names, directed, emoji_
 						if directed == False:
 							mat[max([author_i, reactor_i]), min([author_i, reactor_i])] += 1
 						else:
-							mat[reactor_i, author_i] += 1	
+							mat[reactor_i, author_i] += 1
+							
+						# add 1 to number of interactions
+						n_int += 1	
 			
-	return mat
+	return mat, n_int
 
 # # #
 
@@ -593,7 +582,11 @@ def update_reply_matrix(mat, author_i, replier, acc_names, directed):
 	
 	Output:
 	mat - np.array: updated interaction matrix
+	n_int - int: number of interactions added to matrix
 	"""
+	
+	# set number of interactions to 0
+	n_int = 0
 	
 	# determine index of interactor in acc_names
 	replier_i = np.where(acc_names == replier)[0]
@@ -607,7 +600,10 @@ def update_reply_matrix(mat, author_i, replier, acc_names, directed):
 		else:
 			mat[replier_i, author_i] += 1
 			
-	return mat
+		# add 1 to number of interactions
+		n_int += 1
+			
+	return mat, n_int
 	
 # # #
 
