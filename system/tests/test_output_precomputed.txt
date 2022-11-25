@@ -1,0 +1,357 @@
+Date: 2022-07-01   Channel: community-health
+Lone messages: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+danielo#2815: 0
+katerinabc#6667: 0
+WaKa#6616: 0
+Ene SS Rawa#0855: 0
+remainder: 0
+
+
+Thread messages: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+danielo#2815: 0
+katerinabc#6667: 0
+WaKa#6616: 0
+Ene SS Rawa#0855: 0
+remainder: 0
+
+
+Replies: [0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+danielo#2815: 0
+katerinabc#6667: 0
+WaKa#6616: 0
+Ene SS Rawa#0855: 1
+remainder: 0
+
+
+Thread replies: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+danielo#2815: 0
+katerinabc#6667: 0
+WaKa#6616: 0
+Ene SS Rawa#0855: 0
+remainder: 0
+
+
+Mentions: [0 0 0 0 0 0 0 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+danielo#2815: 0
+katerinabc#6667: 0
+WaKa#6616: 0
+Ene SS Rawa#0855: 2
+remainder: 0
+
+
+Thread mentions: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+danielo#2815: 0
+katerinabc#6667: 0
+WaKa#6616: 0
+Ene SS Rawa#0855: 0
+remainder: 0
+
+
+Reply mentions: [0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+danielo#2815: 0
+katerinabc#6667: 0
+WaKa#6616: 0
+Ene SS Rawa#0855: 1
+remainder: 0
+
+
+Emojis: [0 0 0 0 0 0 0 3 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+danielo#2815: 0
+katerinabc#6667: 0
+WaKa#6616: 0
+Ene SS Rawa#0855: 3
+remainder: 0
+
+ 
+
+Date: 2022-07-02   Channel: community-health
+Lone messages: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 1 0 0 0 0 0 0]
+danielo#2815: 1
+katerinabc#6667: 1
+WaKa#6616: 0
+Ene SS Rawa#0855: 0
+remainder: 0
+
+
+Thread messages: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+danielo#2815: 0
+katerinabc#6667: 0
+WaKa#6616: 0
+Ene SS Rawa#0855: 0
+remainder: 0
+
+
+Replies: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+danielo#2815: 0
+katerinabc#6667: 0
+WaKa#6616: 0
+Ene SS Rawa#0855: 0
+remainder: 0
+
+
+Thread replies: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+danielo#2815: 0
+katerinabc#6667: 0
+WaKa#6616: 0
+Ene SS Rawa#0855: 0
+remainder: 0
+
+
+Mentions: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0]
+danielo#2815: 1
+katerinabc#6667: 0
+WaKa#6616: 0
+Ene SS Rawa#0855: 0
+remainder: 0
+
+
+Thread mentions: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+danielo#2815: 0
+katerinabc#6667: 0
+WaKa#6616: 0
+Ene SS Rawa#0855: 0
+remainder: 0
+
+
+Reply mentions: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+danielo#2815: 0
+katerinabc#6667: 0
+WaKa#6616: 0
+Ene SS Rawa#0855: 0
+remainder: 0
+
+
+Emojis: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0]
+danielo#2815: 0
+katerinabc#6667: 1
+WaKa#6616: 0
+Ene SS Rawa#0855: 0
+remainder: 0
+
+ 
+
+Date: 2022-07-03   Channel: community-health
+Lone messages: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+danielo#2815: 0
+katerinabc#6667: 0
+WaKa#6616: 0
+Ene SS Rawa#0855: 0
+remainder: 0
+
+
+Thread messages: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0]
+danielo#2815: 0
+katerinabc#6667: 0
+WaKa#6616: 1
+Ene SS Rawa#0855: 0
+remainder: 0
+
+
+Replies: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+danielo#2815: 0
+katerinabc#6667: 0
+WaKa#6616: 0
+Ene SS Rawa#0855: 0
+remainder: 0
+
+
+Thread replies: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0]
+danielo#2815: 1
+katerinabc#6667: 0
+WaKa#6616: 0
+Ene SS Rawa#0855: 0
+remainder: 0
+
+
+Mentions: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+danielo#2815: 0
+katerinabc#6667: 0
+WaKa#6616: 0
+Ene SS Rawa#0855: 0
+remainder: 0
+
+
+Thread mentions: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0]
+danielo#2815: 1
+katerinabc#6667: 0
+WaKa#6616: 0
+Ene SS Rawa#0855: 0
+remainder: 0
+
+
+Reply mentions: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0]
+danielo#2815: 1
+katerinabc#6667: 0
+WaKa#6616: 0
+Ene SS Rawa#0855: 0
+remainder: 0
+
+
+Emojis: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 0 0 0]
+danielo#2815: 1
+katerinabc#6667: 0
+WaKa#6616: 1
+Ene SS Rawa#0855: 0
+remainder: 0
+
+ 
+
+Date: 2022-07-02   Channel: general
+Lone messages: [0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+danielo#2815: 1
+katerinabc#6667: 0
+WaKa#6616: 0
+Ene SS Rawa#0855: 0
+remainder: 0
+
+
+Thread messages: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+danielo#2815: 0
+katerinabc#6667: 0
+WaKa#6616: 0
+Ene SS Rawa#0855: 0
+remainder: 0
+
+
+Replies: [0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+danielo#2815: 0
+katerinabc#6667: 0
+WaKa#6616: 0
+Ene SS Rawa#0855: 0
+remainder: 1
+
+
+Thread replies: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+danielo#2815: 0
+katerinabc#6667: 0
+WaKa#6616: 0
+Ene SS Rawa#0855: 0
+remainder: 0
+
+
+Mentions: [0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+danielo#2815: 1
+katerinabc#6667: 0
+WaKa#6616: 0
+Ene SS Rawa#0855: 0
+remainder: 0
+
+
+Thread mentions: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+danielo#2815: 0
+katerinabc#6667: 0
+WaKa#6616: 0
+Ene SS Rawa#0855: 0
+remainder: 0
+
+
+Reply mentions: [0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+danielo#2815: 0
+katerinabc#6667: 0
+WaKa#6616: 0
+Ene SS Rawa#0855: 0
+remainder: 1
+
+
+Emojis: [0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+danielo#2815: 0
+katerinabc#6667: 0
+WaKa#6616: 0
+Ene SS Rawa#0855: 0
+remainder: 1
+
+ 
+
+All channel-date combinations together
+Lone messages: [0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 1 0 1 0 0 0 0 0 0]
+danielo#2815: 2
+katerinabc#6667: 1
+WaKa#6616: 0
+Ene SS Rawa#0855: 0
+remainder: 0
+
+
+Thread messages: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0]
+danielo#2815: 0
+katerinabc#6667: 0
+WaKa#6616: 1
+Ene SS Rawa#0855: 0
+remainder: 0
+
+
+Replies: [0 0 0 0 0 0 0 1 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+danielo#2815: 0
+katerinabc#6667: 0
+WaKa#6616: 0
+Ene SS Rawa#0855: 1
+remainder: 1
+
+
+Thread replies: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0]
+danielo#2815: 1
+katerinabc#6667: 0
+WaKa#6616: 0
+Ene SS Rawa#0855: 0
+remainder: 0
+
+
+Mentions: [0 0 0 0 0 0 0 2 1 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0]
+danielo#2815: 2
+katerinabc#6667: 0
+WaKa#6616: 0
+Ene SS Rawa#0855: 2
+remainder: 0
+
+
+Thread mentions: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0]
+danielo#2815: 1
+katerinabc#6667: 0
+WaKa#6616: 0
+Ene SS Rawa#0855: 0
+remainder: 0
+
+
+Reply mentions: [0 0 0 0 0 0 0 1 0 1 0 0 0 0 0 0 0 0 0 0 1 0 0 0]
+danielo#2815: 1
+katerinabc#6667: 0
+WaKa#6616: 0
+Ene SS Rawa#0855: 1
+remainder: 1
+
+
+Emojis: [0 0 0 0 0 0 0 3 0 1 0 0 0 0 0 1 0 0 0 0 2 0 0 0]
+danielo#2815: 1
+katerinabc#6667: 1
+WaKa#6616: 1
+Ene SS Rawa#0855: 3
+remainder: 1
+
+
+Error count: [1, 0, 1, 1]
+
+
+Test 1: passed
+Test 2: passed
+Test 3: passed
+Test 4: passed
+Test 5: passed
+Test 6: passed
+Test 7: passed
+Test 8: passed
+Test 9: passed
+Test 10: passed
+Test 11: passed
+Test 12: passed
+Test 13: passed
+Test 14: passed
+Test 15: passed
+Test 16: passed
+Test 17: passed
+Test 18: passed
+Test 19: passed
+Test 20: passed
+Test 21: passed
+Test 22: passed
+
+
+All passed: True
