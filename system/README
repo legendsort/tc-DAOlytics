@@ -7,6 +7,14 @@ In addition, a report of the tests is saved as ./tests/test_output.txt.
 
 The results can be compared to ./tests/data/test_discord_daily_activity_precomputed.json and ./tests/test_output_precomputed.txt
 
+The total number of messages per day = lone_messages + thr_messages + replies + thr_replies
+The number of thread messages per day = thr_messages + thr_replies
+The number of mentions per day = mentions + thr_mentions + rep_mentions
+The number of replies per day = replies + thr_replies
+The number of emojis per day = emojis
+The number of interactions per day = thr_messages + replies + mentions + emojis (replies and mentions in threads and mentions of the author of a message that is replied to are not counted as extra interactions)
+
+
 The analysis can be refined with the following optional parameters:
 - Acc_names: if included, the counts for each account listed are stored as separate rows in the output. To get the original result, the output can be summed over the rows. To get the counts per day for the listed accounts, the output can be summed over the columns. Each object contains a variable acc_names which contains the account names at each index of the output. All counts for account names not listed are grouped together in the remainder row. If no account names are listed, all counts are grouped together in the remainder row.
 - Mess_substring: if included, only the messages containing at least one substring in this list are considered. If not included, all messages are considered.
