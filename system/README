@@ -1,11 +1,11 @@
 assess_activity_hourly_system.py counts the activity per hour from a list of json message objects. 
 
-The script can be tested using assess_activity_hourly_system_test.py. All tests are automated. Information about each individual test can be found in test_documentation.doc. 
-The test script uses the ./tests/data/test_discord_messages.json file as input and saves ./tests/data/test_discord_daily_activity.json as output. 
+The scripts require the following imports: sys, json and numpy
 
-In addition, a report of the tests is saved as ./tests/test_output.txt. 
+The format of the input and output objects with examples can be found in: input and output object examples.docx
 
-The results can be compared to ./tests/data/test_discord_daily_activity_precomputed.json and ./tests/test_output_precomputed.txt
+The script can be tested using assess_activity_hourly_system_test.py. All tests are automated. A report of the test results is saved as ./tests/test_output.txt. Information about each individual test can be found in test_documentation.doc. 
+The test script uses the ./tests/data/test_discord_messages.json file as input and saves ./tests/data/test_discord_daily_activity.json as output. The results can be compared to ./tests/data/test_discord_daily_activity_precomputed.json and ./tests/test_output_precomputed.txt
 
 The total number of messages per day = lone_messages + thr_messages + replies + thr_replies
 The number of thread messages per day = thr_messages + thr_replies
