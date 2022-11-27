@@ -218,15 +218,15 @@ def get_obj_list_i(all_day_activity_obj, mess_date, mess_chan, acc_names, warnin
 	"""
 	
 	# check if DayActivity object corresponding to mess_date and mess_chan exists	
-	obj_overlap = [all([getattr(obj,'date','Attribute does not exist')==mess_date, \
-		getattr(obj,'channel','Attribute does not exist')==mess_chan]) \
+	obj_overlap = [all([getattr(obj,'date','Attribute does not exist')[0]==mess_date, \
+		getattr(obj,'channel','Attribute does not exist')[0]==mess_chan]) \
 		for obj in all_day_activity_obj]
 			
 	# if there is no object for the channel date combination
 	if not any(obj_overlap):
 			
 		# create DayActivity object and add it to the list
-		all_day_activity_obj.append(DayActivity(mess_date, mess_chan, \
+		all_day_activity_obj.append(DayActivity([mess_date], [mess_chan], \
 			np.zeros((len(acc_names),24), dtype=np.int16), np.zeros((len(acc_names),24), dtype=np.int16), \
 			np.zeros((len(acc_names),24), dtype=np.int16), np.zeros((len(acc_names),24), dtype=np.int16), \
 			np.zeros((len(acc_names),24), dtype=np.int16), np.zeros((len(acc_names),24), dtype=np.int16), \

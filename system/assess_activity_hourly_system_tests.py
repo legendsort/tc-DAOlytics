@@ -100,11 +100,11 @@ def main(args):
 			all_emojis += np.array(json_obj["emojis"])
 			
 			# assess date of object
-			if json_obj["date"] == GT_DATE:
+			if json_obj["date"][0] == GT_DATE:
 				date_obj_count += 1
 				
 			# assess channel of object
-			if json_obj["channel"] == GT_CHANNEL_NAME:
+			if json_obj["channel"][0] == GT_CHANNEL_NAME:
 				chan_obj_count += 1
 		
 			# # # print results for object # # #
