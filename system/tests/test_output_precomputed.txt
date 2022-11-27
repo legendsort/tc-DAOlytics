@@ -1,4 +1,4 @@
-Date: 2022-07-01   Channel: community-health
+Date: ['2022-07-01']   Channel: ['community-health']
 Lone messages: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
 danielo#2815: 0
 katerinabc#6667: 0
@@ -64,7 +64,7 @@ remainder: 0
 
  
 
-Date: 2022-07-02   Channel: community-health
+Date: ['2022-07-02']   Channel: ['community-health']
 Lone messages: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 1 0 0 0 0 0 0]
 danielo#2815: 1
 katerinabc#6667: 1
@@ -130,7 +130,7 @@ remainder: 0
 
  
 
-Date: 2022-07-03   Channel: community-health
+Date: ['2022-07-03']   Channel: ['community-health']
 Lone messages: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
 danielo#2815: 0
 katerinabc#6667: 0
@@ -196,7 +196,7 @@ remainder: 0
 
  
 
-Date: 2022-07-02   Channel: general
+Date: ['2022-07-02']   Channel: ['general']
 Lone messages: [0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
 danielo#2815: 1
 katerinabc#6667: 0
