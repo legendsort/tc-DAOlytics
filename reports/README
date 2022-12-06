@@ -1,6 +1,6 @@
 Scripts to run the analysis are:
-Analysis_script.py
-General_activity.py
+Analysis_report.py
+General_activity_report.py
 
 All other scripts are called by these main scripts.
 
