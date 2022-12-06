@@ -1,0 +1,4 @@
+Network dentralization = 28.919860627177712
+Network cohesion = 60.34423429772267
+Small worldness = 102.55470737913484
+Average shortes path = 2.176079734219269
