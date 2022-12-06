@@ -1,0 +1,7 @@
+Scripts to run the analysis are:
+Analysis_script.py
+General_activity.py
+
+All other scripts are called by these main scripts.
+
+Specify path to folder with all channel data and list of channels to include in the analysis in the scripts and specify. Change filename of figures to something different than None to have the figures saved.
