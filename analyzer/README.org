@@ -1,0 +1,52 @@
+#+title: RnDAO analyzer
+
+This package compiles the scripts into an object, which can run continuously.
+The package scrapes data from the database, processes is and pushes the result
+into the database.
+
+*Why python package?*
+In future this will make it easier to integrate into services runable on the server.
+
+* Running the program
+
+** Installing the python package
+Inside of the analyzer directory:
+
+To install:
+#+begin_src bash
+make install
+#+end_src
+
+To load (development):
+#+begin_src bash
+make load
+#+end_src
+
+To unload:
+#+begin_src bash
+make unload
+#+end_src
+
+To reinstall when developing:
+#+begin_src bash
+make reload
+#+end_src
+
+** TODO Creating the analyzer object:
+#+begin_src python
+from rndaoanalyzer import RnDaoAnalyzer
+a = Analyzer()
+a.set_database_info(db_info)
+a.run_once()
+#+end_src
+
+
+** TODO Setting the run frequency
+How often should the analyzer be ran.
+
+#+begin_src python
+a.set_analyzer_frequency()
+a.run_forever()
+#+end_src
+
+/This can also be done with a crontab./
