@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 from pymongo.errors import ConnectionFailure
+from pymongo import MongoClient
+from UserSchema import UserModel
+import logging
 
 
 class RnDaoAnalyzer:
@@ -21,6 +24,10 @@ class RnDaoAnalyzer:
         """ Database user password -- TODO: Safe implementation to extract user info from env?"""
         self.db_password = ""
         """ Analysis frequency: if -1 then its infinite"""
+        self.models = []
+        self.collections = {
+            "User": None
+        }
 
 
     def set_database_info(self, db_url:str="",db_user:str="",db_password:str=""):
@@ -37,11 +44,14 @@ class RnDaoAnalyzer:
         Connect to the database
         """
         """ Connection String will be modified once the url is provided"""
-        CONNECTION_STRING = f"mongodb+srv://{self.db_user}:{self.db_password}@{self.db_password}"
+        CONNECTION_STRING = f"mongodb+srv://{self.db_user}:{self.db_password}@cluster0.prmgz21.mongodb.net/?retryWrites=true&w=majority"
+        #CONNECTION_STRING = f"mongodb+srv://{self.db_user}:{self.db_password}@{self.db_password}"
         self.db_client = MongoClient(CONNECTION_STRING,
-                                     serverSelectionTimeoutMS=10,
-                                     connectTimeoutMS=20000)
-        self.database_connection_test()
+                                     serverSelectionTimeoutMS=10000,
+                                     connectTimeoutMS=200000)
+
+        # Model creation
+        self.collections["user"] = UserModel(self.db_client.daodb)
 
     def database_connection_test(self):
         """ Test database connection """
@@ -52,6 +62,7 @@ class RnDaoAnalyzer:
             print("Server not available")
             return
         """TODO: Test the authentication"""
+        print(self.db_client.list_database_names())
 
     def run_once(self):
         """ Run analysis once (Wrapper)"""
@@ -69,8 +80,26 @@ class RnDaoAnalyzer:
         4.) Push the data back into the MongoDB
         """
 
+    def _test(self):
+        self.collections["user"].insert_one(discordId="Test",
+                                            email="test@test.id",
+                                            verified=True,
+                                            avatar="avatar")
+
 
 
 
 if __name__ == "__main__":
+    logging.basicConfig()
+    logging.getLogger().setLevel(logging.INFO)
     analyzer = RnDaoAnalyzer()
+    user = "rndaotest"
+    password = "kb9oQKppqEXo6yJ6"
+    analyzer.set_database_info(
+        db_url="cluster0.prmgz21.mongodb.net/test",
+        db_password=password,
+        db_user=user
+    )
+    analyzer.database_connect()
+    analyzer.database_connection_test()
+    analyzer._test()
