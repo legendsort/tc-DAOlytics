@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  assess_activity_hourly_system.py
+#  activity_hourly.py
 #  
 #  Author Ene SS Rawa / Tjitse van der Molen  
  
@@ -14,7 +14,7 @@ import numpy as np
 
 # # # # # main function # # # # # 
 
-def assess_activity_hourly(json_file, out_file_name, acc_names=[],\
+def activity_hourly(json_file, out_file_name, acc_names=[],\
 	mess_substring=None, emoji_types=None):
 	"""
 	Counts activity per hour from json_file and stores in out_file_name
