@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  assess_activity_hourly_system_main.py
+#  activity_hourly_tests.py
 #  
 #  Author Ene SS Rawa / Tjitse van der Molen  
  
@@ -12,7 +12,7 @@ import sys
 import json
 import numpy as np
 
-from assess_activity_hourly_system import assess_activity_hourly_system
+from activity_hourly import activity_hourly
 
 # # # # # set groundtruth values # # # # #
 
@@ -70,7 +70,7 @@ def main(args):
 		json_file = json.load(f)
 
 	# run actual function
-	warning_count = assess_activity_hourly_system(json_file, save_name, acc_names)
+	warning_count = activity_hourly(json_file, save_name, acc_names)
 			
 		
 	# load saved output
