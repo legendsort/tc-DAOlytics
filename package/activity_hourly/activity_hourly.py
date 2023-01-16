@@ -31,7 +31,7 @@ def activity_hourly(json_file, out_file_name, acc_names=[],\
 		emojis are considered if set to None (default = None)
 		
 	Output:
-	warning_counts - [int]: list of counts for the different possible
+	warning_count - [int]: list of counts for the different possible
 		warnings that could be raised by the script:
 		1st entry: number of messages sent by an author not listed in 
 			acc_names
