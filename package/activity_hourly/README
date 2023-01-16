@@ -35,6 +35,7 @@ emoji_types - [str]: only emojis in this list are considered. All emojis are con
 		
 Output:
 warning_counts - [int]: list of counts for the different possible warnings that could be raised by the script:
+
 1st entry: number of messages sent by author not listed in acc_names
 2nd entry: number of times that a duplicate DayActivity object is encounterd. if this happens, the first object in the list is used.
 3rd entry: number of times a message author mentions themselves in the message. these mentions are not counted
@@ -45,3 +46,18 @@ warning_counts - [int]: list of counts for the different possible warnings that 
 		
 Notes:
 The results are saved as a list of JSON objects based on out_file_name
+
+
+Example of using the function:
+
+Normal use
+warning_count = activity_hourly(json_file, out_file_name, acc_names)
+
+Specific substrings and all emojis (no need to implement this yet but could be feature in future)
+warning_count = activity_hourly(json_file, out_file_name, acc_names, ["thank", "grateful"], None)
+
+Specific emojis and all substrings (no need to implement this yet but could be feature in future)
+warning_count = activity_hourly(json_file, out_file_name, acc_names, None, ["🤙", "👍"])
+
+Specific substrings and emojis (no need to implement this yet but could be feature in future)
+warning_count = activity_hourly(json_file, out_file_name, acc_names, ["thank", "grateful"], ["🤙", "👍"])
