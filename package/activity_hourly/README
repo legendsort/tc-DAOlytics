@@ -51,13 +51,13 @@ The results are saved as a list of JSON objects based on out_file_name
 Example of using the function:
 
 Normal use
-warning_count = activity_hourly(json_file, out_file_name, acc_names)
+warning_counts = activity_hourly(json_file, out_file_name, acc_names)
 
 Specific substrings and all emojis (no need to implement this yet but could be feature in future)
-warning_count = activity_hourly(json_file, out_file_name, acc_names, ["thank", "grateful"], None)
+warning_counts = activity_hourly(json_file, out_file_name, acc_names, ["thank", "grateful"], None)
 
 Specific emojis and all substrings (no need to implement this yet but could be feature in future)
-warning_count = activity_hourly(json_file, out_file_name, acc_names, None, ["🤙", "👍"])
+warning_counts = activity_hourly(json_file, out_file_name, acc_names, None, ["🤙", "👍"])
 
 Specific substrings and emojis (no need to implement this yet but could be feature in future)
-warning_count = activity_hourly(json_file, out_file_name, acc_names, ["thank", "grateful"], ["🤙", "👍"])
+warning_counts = activity_hourly(json_file, out_file_name, acc_names, ["thank", "grateful"], ["🤙", "👍"])
