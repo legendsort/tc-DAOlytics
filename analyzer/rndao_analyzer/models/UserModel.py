@@ -4,33 +4,28 @@ from typing import TypedDict
 
 
 class UserModel():
-    def __init__(self, database):
+    def __init__(self, database=None):
         if database is None:
             logging.info("Database does not exist.")
-            raise Exception()
+            raise Exception("Database should not be None")
         self.database = database
         self.collection_name = "user"
         self.exists = False
-        print("test")
-
-    def _create_collection(self):
-        validator = {
+        self.validator = {
             "$jsonSchema" :{
                 "bsonType": "object",
                 "required" : ["discordId", "email"],
-                "uniqueItems" : ["discordId", "email"],
                 "properties":{
                     "discordId":{
                         "bsonType":"string",
-                        "unique":True,
+                        "uniqueItems":True,
                     },
                     "email":{
                         "bsonType": "string",
-                        "trim":"true",
-                        "lowercase":"true",
+                        "uniqueItems":True,
                     },
                     "verified":{
-                        "bsonType":"boolean"
+                        "bsonType":"bool"
                     },
                     "avatar":{
                         "bsonType":"string"
@@ -49,17 +44,12 @@ class UserModel():
            result = self.database.create_collection(self.collection_name)
            logging.info(result)
         self.collection = self.database.user
+        self.database.command("collMod", self.collection_name, validator=self.validator)
         self.exists = True
 
-    def insert_one(self, discordId, email, verified, avatar):
+    def insert_one(self, obj_dict):
         if not self.exists:
             print("Not existing")
             self._create_collection_if_not_exists()
-        logging.info(f"Inserting {discordId} into the {self.collection} collection.")
-        obj_dict = {
-            "discordId": discordId,
-            "email": email,
-            "verified": verified,
-            "avatar":avatar
-        }
-        self.collection.insert_one(obj_dict)
+        logging.info(f"Inserting user entry into the {self.collection_name} collection.")
+        return self.collection.insert_one(obj_dict)

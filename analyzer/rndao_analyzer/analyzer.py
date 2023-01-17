@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 from pymongo.errors import ConnectionFailure
 from pymongo import MongoClient
-from UserSchema import UserModel
+from models.UserModel import UserModel
+from models.GuildModel import GuildModel
+from models.HeatMapModel import HeatMapModel
+from models.RawInfoModel import RawInfoModel
+from datetime import datetime
 import logging
 
 
@@ -26,7 +30,9 @@ class RnDaoAnalyzer:
         """ Analysis frequency: if -1 then its infinite"""
         self.models = []
         self.collections = {
-            "User": None
+            "user": None,
+            "guild":None,
+            "heatmap":None,
         }
 
 
@@ -52,6 +58,8 @@ class RnDaoAnalyzer:
 
         # Model creation
         self.collections["user"] = UserModel(self.db_client.daodb)
+        self.collections["guild"] = GuildModel(self.db_client.daodb)
+        self.collections["heatmap"] = HeatMapModel(self.db_client.daodb)
 
     def database_connection_test(self):
         """ Test database connection """
@@ -81,10 +89,30 @@ class RnDaoAnalyzer:
         """
 
     def _test(self):
-        self.collections["user"].insert_one(discordId="Test",
-                                            email="test@test.id",
-                                            verified=True,
-                                            avatar="avatar")
+        """
+        A small function to test functionalities when developing.
+        Will be removed afterwards
+        """
+        id = self.collections["user"].insert_one(
+            {
+                "discordId":"someid",
+                "email":"test@email.com",
+                "verified":False
+            }
+        ).inserted_id
+
+        self.collections["guild"].insert_one(
+            {
+                "guildId":"first_guild",
+                "user":id,
+                "name":"guild name"
+            })
+        self.collections["heatmap"].insert_one(
+            {
+                "date":datetime.now(),
+                # "channel":"123",
+                # "messages":[1,2,3]
+            })
 
 
 
