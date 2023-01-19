@@ -1,19 +1,24 @@
-assess_activity_hourly_system.py counts the activity per hour from a list of json message objects. 
+activity_hourly.py counts the activity per hour from a list of json message objects. 
 
 The scripts require the following imports: sys, json and numpy
 
 The format of the input and output objects with examples can be found in: input and output object examples.docx
 
-The script can be tested using assess_activity_hourly_system_test.py. All tests are automated. A report of the test results is saved as ./tests/test_output.txt. Information about each individual test can be found in test_documentation.doc. 
+The script can be tested using activity_hourly_test.py. All tests are automated. A report of the test results is saved as ./tests/test_output.txt. Information about each individual test can be found in test_documentation.doc. 
 The test script uses the ./tests/data/test_discord_messages.json file as input and saves ./tests/data/test_discord_daily_activity.json as output. The results can be compared to ./tests/data/test_discord_daily_activity_precomputed.json and ./tests/test_output_precomputed.txt
 
-The total number of messages per day = lone_messages + thr_messages + replies + thr_replies
-The number of thread messages per day = thr_messages + thr_replies
-The number of mentions per day = mentions + thr_mentions + rep_mentions
-The number of replies per day = replies + thr_replies
-The number of emojis per day = emojis
-The number of interactions per day = thr_messages + replies + mentions + emojis (replies and mentions in threads and mentions of the author of a message that is replied to are not counted as extra interactions)
+For hourly activity per day
+The total number of messages per day = lone_messages + thr_messages + replier
+The number of mentions per day = mentioner + rep_mentioner
+The number of replies per day = replier
+The number of emojis per day = reacter
+The number of interactions per day = replier + mentioner + reacter (mentions of the author of a message that is replied to are not counted as extra interactions besides the reply)
 
+For activity per account per day
+Sent messages = lone_messages + thr_messages + replier
+Outgoing interactions = replied + reacted + mentioner
+Incoming interactions = replier + reacter + mentioned
+Total interactions = outgoing interactions + incoming interactions
 
 The analysis can be refined with the following optional parameters:
 - Acc_names: if included, the counts for each account listed are stored as separate rows in the output. To get the original result, the output can be summed over the rows. To get the counts per day for the listed accounts, the output can be summed over the columns. Each object contains a variable acc_names which contains the account names at each index of the output. All counts for account names not listed are grouped together in the remainder row. If no account names are listed, all counts are grouped together in the remainder row.
@@ -29,11 +34,30 @@ mess_substring - [str]: only messages containing at least one substring in this 
 emoji_types - [str]: only emojis in this list are considered. All emojis are considered if set to None (default = None)
 		
 Output:
-warning_counts - [int]: list of counts for the different possible warnings that could be raised by the script:
+warning_count - [int]: list of counts for the different possible warnings that could be raised by the script:
+
 1st entry: number of messages sent by author not listed in acc_names
 2nd entry: number of times that a duplicate DayActivity object is encounterd. if this happens, the first object in the list is used.
 3rd entry: number of times a message author mentions themselves in the message. these mentions are not counted
-4rd entry: number of times a message author emoji reacts to their own message. these reactions are not counted
-			
+4th entry: number of times a message author emoji reacts to their own message. these reactions are not counted
+5th entry: number of times an emoji sender is not in acc_names
+6th entry: number of times a mentioned account is not in acc_names
+7th entry: number of times an account that is replied to is not in acc_names	
+		
 Notes:
 The results are saved as a list of JSON objects based on out_file_name
+
+
+Example of using the function:
+
+Normal use
+warning_count = activity_hourly(json_file, out_file_name, acc_names)
+
+Specific substrings and all emojis (no need to implement this yet but could be feature in future)
+warning_count = activity_hourly(json_file, out_file_name, acc_names, ["thank", "grateful"], None)
+
+Specific emojis and all substrings (no need to implement this yet but could be feature in future)
+warning_count = activity_hourly(json_file, out_file_name, acc_names, None, ["🤙", "👍"])
+
+Specific substrings and emojis (no need to implement this yet but could be feature in future)
+warning_count = activity_hourly(json_file, out_file_name, acc_names, ["thank", "grateful"], ["🤙", "👍"])

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  assess_activity_hourly_system.py
+#  activity_hourly.py
 #  
 #  Author Ene SS Rawa / Tjitse van der Molen  
  
@@ -14,7 +14,7 @@ import numpy as np
 
 # # # # # main function # # # # # 
 
-def assess_activity_hourly_system(json_file, out_file_name, acc_names=[],\
+def activity_hourly(json_file, out_file_name, acc_names=[],\
 	mess_substring=None, emoji_types=None):
 	"""
 	Counts activity per hour from json_file and stores in out_file_name
@@ -31,9 +31,9 @@ def assess_activity_hourly_system(json_file, out_file_name, acc_names=[],\
 		emojis are considered if set to None (default = None)
 		
 	Output:
-	warning_counts - [int]: list of counts for the different possible
+	warning_count - [int]: list of counts for the different possible
 		warnings that could be raised by the script:
-		1st entry: number of messages sent by author not listed in 
+		1st entry: number of messages sent by an author not listed in 
 			acc_names
 		2nd entry: number of times that a duplicate DayActivity object
 			is encounterd. if this happens, the first object in the list
@@ -42,13 +42,18 @@ def assess_activity_hourly_system(json_file, out_file_name, acc_names=[],\
 			in the message. these mentions are not counted
 		4rd entry: number of times a message author emoji reacts to
 			their own message. these reactions are not counted
+		5th entry: number of times an emoji sender is not in acc_names
+		6th entry: number of times a mentioned account is not in 
+			acc_names
+		7th entry: number of times an account that is replied to is not
+			in acc_names
 			
 	Notes:
 	The results are saved as JSON objects based on out_file_name
 	"""
 	
 	# initiate array with zeros for counting error occurences
-	warning_count = [0]*4
+	warning_count = [0]*7
 	
 	# initiate empty result array for DayActivity objects
 	all_day_activity_obj = []
@@ -67,19 +72,34 @@ def assess_activity_hourly_system(json_file, out_file_name, acc_names=[],\
 			
 			# # # extract data # # #
 		
-			# obtain message date, channel and author
+			# obtain message date, channel and author and reply author
 			mess_date = mess["datetime"].split(" ")[0]
 			mess_hour = int(mess["datetime"].split(" ")[1].split(":")[0])
 			mess_chan = mess["channel"]
 			mess_auth = mess["author"]
+			rep_auth = mess["replied_user"]
 			
-			# obtain index of author in acc_names
 			try:
+				# obtain index of author in acc_names
 				auth_i = acc_names.index(mess_auth)
 			except:
+				# if author is not in acc_names, raise warning and add counts to remainder
 				print("WARNING: author name {} not found in acc_names".format(mess_auth))
-				auth_i = -1
 				warning_count[0] += 1
+				auth_i = -1
+			
+			if len(rep_auth) > 0:
+				try:
+					# obtain index of reply author in acc_names
+					rep_i = acc_names.index(rep_auth)
+				except:
+					# if author is not in acc_names, raise warning and add counts to remainder
+					print("WARNING: author name {} not found in acc_names".format(rep_auth))
+					warning_count[6] += 1
+					rep_i = -1
+			else:
+				rep_i = None
+		
 		
 			# # # obtain object index in object list # # #
 		
@@ -88,18 +108,22 @@ def assess_activity_hourly_system(json_file, out_file_name, acc_names=[],\
 				all_day_activity_obj, mess_date, mess_chan, acc_names, warning_count)
 		
 		
-			# # # count # # #
+			# # # count activity per hour # # #
 			
 			# count reactions				
-			n_reac, warning_count = count_reactions(mess["reactions"], \
-				emoji_types, mess_auth, warning_count)
+			n_reac, reacting_accs, warning_count = count_reactions(mess["reactions"], \
+				emoji_types, mess_auth, warning_count)				
 			
 			# add n_reac to hour of message that received the emoji
-			all_day_activity_obj[obj_list_i].emojis[auth_i,mess_hour]+=int(n_reac)
-			
+			all_day_activity_obj[obj_list_i].reacted[auth_i,mess_hour]+=int(n_reac)
+						
+			# count raised warnings		
+			warning_count[4] += count_from_list(reacting_accs, acc_names, \
+				all_day_activity_obj[obj_list_i].reacter, mess_hour)
+							
 			# count mentions
-			n_men, n_rep_men, warning_count = count_mentions(mess["user_mentions"], \
-				mess["replied_user"], mess_auth, warning_count)
+			n_men, n_rep_men, mentioned_accs, warning_count = count_mentions(mess["user_mentions"], \
+				rep_auth, mess_auth, warning_count)
           
 			# if message was not sent in thread
 			if not mess["thread"]:
@@ -110,22 +134,38 @@ def assess_activity_hourly_system(json_file, out_file_name, acc_names=[],\
 					# add 1 to hour of message
 					all_day_activity_obj[obj_list_i].lone_messages[auth_i,mess_hour]+=int(1)
 					
-					# add n_men to hour of message
-					all_day_activity_obj[obj_list_i].mentions[auth_i,mess_hour]+=int(n_men)
+					# add n_men to hour for message sender
+					all_day_activity_obj[obj_list_i].mentioner[auth_i,mess_hour]+=int(n_men)
 					
+					# count raised warnings	
+					warning_count[5] += count_from_list(mentioned_accs, acc_names, \
+						all_day_activity_obj[obj_list_i].mentioned, mess_hour)
+				
 				
 				# if message is reply
 				elif mess["mess_type"] == "REPLY":
 				
-					# add 1 to hour of message
-					all_day_activity_obj[obj_list_i].replies[auth_i,mess_hour]+=int(1)
+					# add 1 to hour of message for replier
+					all_day_activity_obj[obj_list_i].replier[auth_i,mess_hour]+=int(1)
 					
-					# add n_men to hour of message
-					all_day_activity_obj[obj_list_i].mentions[auth_i,mess_hour]+=int(n_men)
+					# add 1 to hour of message for replied
+					all_day_activity_obj[obj_list_i].replied[rep_i,mess_hour]+=int(1)
 					
+					# add n_men to hour for message sender
+					all_day_activity_obj[obj_list_i].mentioner[auth_i,mess_hour]+=int(n_men)
+					
+					# count raised warnings		
+					warning_count[5] += count_from_list(mentioned_accs, acc_names, \
+						all_day_activity_obj[obj_list_i].mentioned, mess_hour)
+						
 					# add n_rep_men to hour of message
-					all_day_activity_obj[obj_list_i].rep_mentions[auth_i,mess_hour]+=int(n_rep_men)
-				
+					all_day_activity_obj[obj_list_i].rep_mentioner[auth_i,mess_hour]+=int(n_rep_men)
+					all_day_activity_obj[obj_list_i].rep_mentioned[rep_i,mess_hour]+=int(n_rep_men)
+					
+					# if reply is to unknown account and this account got mentioned in the reply
+					if n_rep_men > 0 and rep_i == -1:
+						print("WARNING: acc name {} not found in acc_names".format(rep_auth))
+						warning_count[5] += 1
 				
 			# if message was sent in thread	
 			else:
@@ -136,22 +176,39 @@ def assess_activity_hourly_system(json_file, out_file_name, acc_names=[],\
 					# add 1 to hour of message
 					all_day_activity_obj[obj_list_i].thr_messages[auth_i,mess_hour]+=int(1)
 				
-					# add n_men to hour of message
-					all_day_activity_obj[obj_list_i].thr_mentions[auth_i,mess_hour]+=int(n_men)
+					# add n_men to hour for message sender
+					all_day_activity_obj[obj_list_i].mentioner[auth_i,mess_hour]+=int(n_men)
+					
+					# count raised warnings		
+					warning_count[5] += count_from_list(mentioned_accs, acc_names, \
+						all_day_activity_obj[obj_list_i].mentioned, mess_hour)
 					
 					
 				# if message is reply	
 				elif mess["mess_type"] == "REPLY":
 				
-					# add 1 to hour of message
-					all_day_activity_obj[obj_list_i].thr_replies[auth_i,mess_hour]+=int(1)
+					# add 1 to hour of message for replier
+					all_day_activity_obj[obj_list_i].replier[auth_i,mess_hour]+=int(1)
 					
-					# add n_men to hour of message
-					all_day_activity_obj[obj_list_i].thr_mentions[auth_i,mess_hour]+=int(n_men)
+					# add 1 to hour of message for replied
+					all_day_activity_obj[obj_list_i].replied[rep_i,mess_hour]+=int(1)
+					
+					# add n_men to hour for message sender
+					all_day_activity_obj[obj_list_i].mentioner[auth_i,mess_hour]+=int(n_men)
+					
+					# count raised warnings	
+					warning_count[5] += count_from_list(mentioned_accs, acc_names, \
+						all_day_activity_obj[obj_list_i].mentioned, mess_hour)
 					
 					# add n_rep_men to hour of message
-					all_day_activity_obj[obj_list_i].rep_mentions[auth_i,mess_hour]+=int(n_rep_men)
+					all_day_activity_obj[obj_list_i].rep_mentioner[auth_i,mess_hour]+=int(n_rep_men)
+					all_day_activity_obj[obj_list_i].rep_mentioned[rep_i,mess_hour]+=int(n_rep_men)
 					
+					# if reply is to unknown account and this account got mentioned in the reply
+					if n_rep_men > 0 and rep_i == -1:
+						print("WARNING: acc name {} not found in acc_names".format(rep_auth))
+						warning_count[5] += 1
+						
 											
 	# # # store results	# # #
 	json_out_file = store_results_json([i.asdict() for i in \
@@ -166,20 +223,23 @@ def assess_activity_hourly_system(json_file, out_file_name, acc_names=[],\
 class DayActivity:
    
 	# define constructor
-	def __init__(self,date,channel,lone_messages,thr_messages,replies,\
-		thr_replies,mentions,thr_mentions,rep_mentions,emojis,acc_names): 
+	def __init__(self,date,channel,lone_messages,thr_messages,replier,\
+		replied,mentioner,mentioned,rep_mentioner,rep_mentioned,\
+		reacter,reacted,acc_names): 
 		
-		self.date = date
-		self.channel = channel
-		self.lone_messages = lone_messages
-		self.thr_messages = thr_messages
-		self.replies = replies
-		self.thr_replies = thr_replies
-		self.mentions = mentions
-		self.thr_mentions = thr_mentions
-		self.rep_mentions = rep_mentions
-		self.emojis = emojis
-		self.acc_names = acc_names
+		self.date = date 					# date of object
+		self.channel = channel				# channel of object
+		self.lone_messages = lone_messages	# number of lone messages per hour per account
+		self.thr_messages = thr_messages 	# number of thread messages per hour per account
+		self.replier = replier 				# number of replies sent per hour per account
+		self.replied = replied 				# number of replies received per hour per account
+		self.mentioner = mentioner			# number of mentions sent per hour per account
+		self.mentioned = mentioned			# number of mentions received per hour per account
+		self.rep_mentioner = rep_mentioner 	# number of reply mentions sent per hour per account
+		self.rep_mentioned = rep_mentioned 	# number of reply mentions received per hour per account
+		self.reacter = reacter		 		# number of reactions sent per hour per account
+		self.reacted = reacted 				# number of reactions received per hour per account
+		self.acc_names = acc_names 			# account names (corresponds to row index of activity types)
 	
 	
 	# # # functions # # #
@@ -188,11 +248,11 @@ class DayActivity:
 	def asdict(self):
 		return {'date': self.date, 'channel': self.channel, \
 			'lone_messages': self.lone_messages.tolist(), 'thr_messages': \
-			self.thr_messages.tolist(), 'replies': self.replies.tolist(), \
-			'thr_replies': self.thr_replies.tolist(), 'mentions': \
-			self.mentions.tolist(), 'thr_mentions': self.thr_mentions.tolist(), \
-			'rep_mentions': self.rep_mentions.tolist(), 'emojis': \
-			self.emojis.tolist(), 'acc_names': self.acc_names} 
+			self.thr_messages.tolist(), 'replier': self.replier.tolist(), \
+			'replied': self.replied.tolist(), 'mentioner': self.mentioner.tolist(), \
+			'mentioned': self.mentioned.tolist(), 'rep_mentioner': self.rep_mentioner.tolist(), \
+			'rep_mentioned': self.rep_mentioned.tolist(), 'reacter': self.reacter.tolist(), \
+			'reacted': self.reacted.tolist(), 'acc_names': self.acc_names} 
           
           
 # # # # # functions # # # # #
@@ -231,6 +291,7 @@ def get_obj_list_i(all_day_activity_obj, mess_date, mess_chan, acc_names, warnin
 			np.zeros((len(acc_names),24), dtype=np.int16), np.zeros((len(acc_names),24), dtype=np.int16), \
 			np.zeros((len(acc_names),24), dtype=np.int16), np.zeros((len(acc_names),24), dtype=np.int16), \
 			np.zeros((len(acc_names),24), dtype=np.int16), np.zeros((len(acc_names),24), dtype=np.int16), \
+			np.zeros((len(acc_names),24), dtype=np.int16), np.zeros((len(acc_names),24), dtype=np.int16), \
 			acc_names))
 			
 		# set list index for message
@@ -265,6 +326,7 @@ def count_mentions(mess_mentions, replied_user, mess_auth, warning_count):
 	n_men - int: number of mentions in message
 	n_rep_men - int: number of times the author of the message that is 
 		replied to is mentioned in the message
+	reacting_accs - [str]: all account names that were mentioned 
 	
 	Notes:
 	authors mentioning themselves are not counted
@@ -273,31 +335,38 @@ def count_mentions(mess_mentions, replied_user, mess_auth, warning_count):
 	# set number of interactions to 0
 	n_men = 0
 	n_rep_men = 0
+	mentioned_accs = []
           
-	# for each interaction
+	# for each mentioned account
 	for mentioned in mess_mentions:
+			
+		# if mentioned is not empty
+		if len(mentioned) > 0:
 				
-		# if mentioned account is the same as message author
-		if mentioned == mess_auth: 
-					
-			# print error and skip
-			print("WARNING: {} mentioned themselves. This is not counted".format(mess_auth))
-			warning_count[2] += 1
-					
-		else:
-					
-			# if mentioned account is not the account that was replied to
-			if mentioned != replied_user: 
+			# if mentioned account is the same as message author
+			if mentioned == mess_auth: 
 						
-				# add 1 to number of mentions
-				n_men += 1
+				# print error and skip
+				print("WARNING: {} mentioned themselves. This is not counted".format(mess_auth))
+				warning_count[2] += 1
 						
 			else:
+						
+				# if mentioned account is not the account that was replied to
+				if mentioned != replied_user: 
+							
+					# add 1 to number of mentions
+					n_men += 1
+					
+					# add mentioned account to mentioned_accs
+					mentioned_accs.append(mentioned)
+							
+				else:
+					
+					# add 1 to number of replied mentions
+					n_rep_men = 1
 				
-				# add 1 to number of replied mentions
-				n_rep_men += 1
-				
-	return n_men, n_rep_men, warning_count
+	return n_men, n_rep_men, mentioned_accs, warning_count
 		
 # # #
 
@@ -312,17 +381,26 @@ def count_reactions(mess_reactions, emoji_types, mess_auth, warning_count):
 	emoji_types - [str] or None: list of emoji types to be considered.
 		All emojis are considered when None
 	mess_auth - str: message author
+	warning_count - [int]: list with counts for warning types
 	
 	Output:
 	n_reac - int: number of emoji reactions to post
-	
+	reacting_accs - [str]: all account names that sent an emoji (if  
+		account sent >1 emoji, account name will be listed >1)
+	warning_count - [int]: upated list with counts for warning types
+
 	notes:
-	emojis reacted by the author of the message are not counted
+	emojis reacted by the author of the message are not counted but lead
+		to a warning instead
 	"""
 						
 	# set number of reactions to 0
 	n_reac = 0
+	
+	# make empty list for all accounts that sent an emoji
+	reacting_accs = []
 			
+	# for every emoji type
 	for emoji_type in mess_reactions:
 						
 		# if reacting account is in acc_names and reacted emoji is part of emoji_types if defined
@@ -343,8 +421,55 @@ def count_reactions(mess_reactions, emoji_types, mess_auth, warning_count):
 							
 					# add 1 to number of reactions
 					n_reac += 1	
+					
+					# store name of reactor
+					reacting_accs.append(reactor)
 	
-	return n_reac, warning_count
+	return n_reac, reacting_accs, warning_count
+
+# # #
+
+def count_from_list(acc_list, acc_names, to_count, mess_hour): 
+	"""
+	Adds counts per hour to accounts from list
+	
+	Input:
+	acc_list - [str]: all account names that should be counted (the 
+		account is counted for each time it is in the list, allowing for
+		duplicates)
+	acc_names - [str]: account names for which activity should be
+		counted separately
+	to_count - [[int]]: activity type to be counted
+	mess_hour - int: hour at which message with activity was sent
+	
+	Output:
+	warning_count - int: number of times warning was raised
+	
+	Notes:
+	counts are added to DayActivity object under the to_count variable	
+	"""
+
+	# initiate warning count at 0
+	warning_count = 0
+	
+	# for each account
+	for acc in acc_list:
+		
+		try:
+			# obtain index of account name in acc_names
+			acc_i = acc_names.index(acc)
+			
+		except:
+			
+			# if acc is not in acc_names, raise warning and add count to remainder
+			print("WARNING: acc name {} not found in acc_names".format(acc))
+			warning_count += 1
+			acc_i = -1
+				
+		# add 1 to hour of message for acc
+		to_count[acc_i,mess_hour]+=int(1)
+		
+	return warning_count
 	
 # # #
 
