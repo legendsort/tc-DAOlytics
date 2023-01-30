@@ -5,8 +5,10 @@ from models.UserModel import UserModel
 from models.GuildModel import GuildModel
 from models.HeatMapModel import HeatMapModel
 from models.RawInfoModel import RawInfoModel
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
+from analysis.activity_hourly import activity_hourly
 import logging
+from dateutil import tz
 
 
 class RnDaoAnalyzer:
@@ -50,16 +52,19 @@ class RnDaoAnalyzer:
         Connect to the database
         """
         """ Connection String will be modified once the url is provided"""
-        CONNECTION_STRING = f"mongodb+srv://{self.db_user}:{self.db_password}@cluster0.prmgz21.mongodb.net/?retryWrites=true&w=majority"
+        #CONNECTION_STRING = f"mongodb+srv://{self.db_user}:{self.db_password}@cluster0.mgy22jx.mongodb.net/test"
+        CONNECTION_STRING = f"mongodb+srv://root:root@cluster0.mgy22jx.mongodb.net/test"
+
         #CONNECTION_STRING = f"mongodb+srv://{self.db_user}:{self.db_password}@{self.db_password}"
         self.db_client = MongoClient(CONNECTION_STRING,
                                      serverSelectionTimeoutMS=10000,
                                      connectTimeoutMS=200000)
 
         # Model creation
-        self.collections["user"] = UserModel(self.db_client.daodb)
-        self.collections["guild"] = GuildModel(self.db_client.daodb)
-        self.collections["heatmap"] = HeatMapModel(self.db_client.daodb)
+        #print(self.db_client.RnDAO.list_collection_names())
+        # self.collections["user"] = UserModel(self.db_client.RnDAO)
+        # self.collections["guild"] = GuildModel(self.db_client.RnDAO)
+        # self.collections["heatmap"] = HeatMapModel(self.db_client.RnDAO)
 
     def database_connection_test(self):
         """ Test database connection """
@@ -70,17 +75,84 @@ class RnDaoAnalyzer:
             print("Server not available")
             return
         """TODO: Test the authentication"""
+        print("Databases:")
         print(self.db_client.list_database_names())
+        print("Guild 1")
+        print(self.db_client["guildId#1"].list_collection_names())
 
-    def run_once(self):
+
+    def run_once(self, guild):
         """ Run analysis once (Wrapper)"""
-        self._analyze()
+        self._analyze(guild)
 
-    def _analyze(self):
+    def analysis_heatmap(self, guild):
+        """
+        Based on the rawdata creates and stores the heatmap data
+        """
+        #activity_hourly()
+        if not guild in self.db_client.list_database_names():
+            raise Exception("Chosen database does not exist")
+        else:
+            print("Database exists")
+
+        # Collections involved in analysis
+        rawinfo_c = RawInfoModel(self.db_client[guild])
+        heatmap_c = HeatMapModel(self.db_client[guild])
+
+        if not heatmap_c.is_present():
+            raise Exception(f"Collection '{heatmap_c.collection_name}' does not exist")
+        if not rawinfo_c.is_present():
+            raise Exception(f"Collection '{rawinfo_c.collection_name}' does not exist")
+
+
+        for document in rawinfo_c.get_all():
+            print(document)
+
+        for document in heatmap_c.get_all():
+            print(document)
+
+        # The last date heatmap created for
+        last_date = heatmap_c.get_last_date()
+        last_date = None
+        last_date = datetime(2023,1,1,0,0,0).astimezone()
+        if last_date == None:
+            # If no heatmap was created, than tha last date is the first
+            # rawdata entry
+            last_date = rawinfo_c.get_first_date()
+            last_date.replace(tzinfo=timezone.utc)
+
+        # Generate heatmap for the days between the last_date and today
+        rawinfo_c.test_get()
+        while last_date.astimezone() < datetime.now().astimezone()-timedelta(days=1):
+            print(last_date)
+            last_date = last_date + timedelta(days=1)
+            entries = rawinfo_c.get_day_entries(last_date)
+            if len(entries)==0:
+                continue
+            print("ANALYZING")
+            #Prepare the list
+            prepared_list = []
+            for entry in entries:
+                prepared_list.append(
+                    {
+                        "datetime": entry["created_at"].strftime('%Y-%m-%d %H:%M'),
+                        "channel" : entry["channelId"],
+                        "author"  : entry["author"],
+                        "replied_user": entry["replied_User"],
+                        "reactions" : entry["reactions"],
+                        "thread" : None,
+                        "mess_type": entry["type"],
+                    }
+                )
+            print(activity_hourly(prepared_list))
+
+
+
+
+    def _analyze(self, guild):
         """
         Run analysis once (private function)
         """
-        pass
         """TODO
         1.) Get the data from the MongoDB
         2.) Parse the data
@@ -88,31 +160,29 @@ class RnDaoAnalyzer:
         4.) Push the data back into the MongoDB
         """
 
+        if not guild in self.db_client.list_database_names():
+            raise Exception("Chosen database does not exist")
+        else:
+            print("Database exists")
+
+        # Collections involved in analysis
+        rawinfo_c = RawInfoModel(self.db_client[guild])
+        heatmap_c = HeatMapModel(self.db_client[guild])
+
+        if not heatmap_c.is_present():
+            raise Exceptino(f"Collection '{heatmap_c.collection_name}' does not exist")
+        if not rawinfo_c.is_present():
+            raise Exceptino(f"Collection '{rawinfo_c.collection_name}' does not exist")
+
+        for document in rawinfo_c.get_all():
+            print(document)
+
+
     def _test(self):
         """
         A small function to test functionalities when developing.
         Will be removed afterwards
         """
-        id = self.collections["user"].insert_one(
-            {
-                "discordId":"someid",
-                "email":"test@email.com",
-                "verified":False
-            }
-        ).inserted_id
-
-        self.collections["guild"].insert_one(
-            {
-                "guildId":"first_guild",
-                "user":id,
-                "name":"guild name"
-            })
-        self.collections["heatmap"].insert_one(
-            {
-                "date":datetime.now(),
-                # "channel":"123",
-                # "messages":[1,2,3]
-            })
 
 
 
@@ -121,13 +191,18 @@ if __name__ == "__main__":
     logging.basicConfig()
     logging.getLogger().setLevel(logging.INFO)
     analyzer = RnDaoAnalyzer()
-    user = "rndaotest"
-    password = "kb9oQKppqEXo6yJ6"
+    #user = "rndaotest"
+    #password = "kb9oQKppqEXo6yJ6"
+    #url="cluster0.prmgz21.mongodb.net/test",
+    user = "tcmongo"
+    password = "T0g3th3rCr3wM0ng0P55"
+
     analyzer.set_database_info(
-        db_url="cluster0.prmgz21.mongodb.net/test",
+        db_url="",
         db_password=password,
         db_user=user
     )
     analyzer.database_connect()
-    analyzer.database_connection_test()
-    analyzer._test()
+    #analyzer.database_connection_test()
+    #analyzer._test()
+    analyzer.analysis_heatmap('guildId#1')
