@@ -132,6 +132,7 @@ class RnDaoAnalyzer:
             print("ANALYZING")
             #Prepare the list
             prepared_list = []
+            account_list = []
             for entry in entries:
                 prepared_list.append(
                     {
@@ -139,12 +140,21 @@ class RnDaoAnalyzer:
                         "channel" : entry["channelId"],
                         "author"  : entry["author"],
                         "replied_user": entry["replied_User"],
+                        "user_mentions": entry["user_Mentions"],
                         "reactions" : entry["reactions"],
                         "thread" : None,
                         "mess_type": entry["type"],
                     }
                 )
-            print(activity_hourly(prepared_list))
+                if not entry["author"] in account_list:
+                    account_list.append(entry["author"])
+
+                for account in entry["user_Mentions"]:
+                    if account not in account_list:
+                        account_list.append(account)
+            print(account_list)
+            print(activity_hourly(prepared_list, acc_names=account_list))
+
 
 
 
