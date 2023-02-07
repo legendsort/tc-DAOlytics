@@ -97,7 +97,7 @@ class HeatMapModel(BaseModel):
         """
         try:
             date_str = self.database[self.collection_name].find().sort([("date", pymongo.DESCENDING)]).limit(1)[0]["date"]
-
+            return date_str
             #Parsing the time and timezone
             date_str = date_str.split(" GMT")
             date_str[1] = "GMT"+date_str[1]

@@ -34,6 +34,8 @@ class RnDaoAnalyzer:
         self.db_user = ""
         """ Database user password -- TODO: Safe implementation to extract user info from env?"""
         self.db_password = ""
+        """ Testing, prevents from data upload"""
+        self.testing = True
 
 
     def set_database_info(self, db_url:str="",db_user:str="",db_password:str=""):
@@ -51,9 +53,11 @@ class RnDaoAnalyzer:
         """
         """ Connection String will be modified once the url is provided"""
         #CONNECTION_STRING = f"mongodb+srv://{self.db_user}:{self.db_password}@cluster0.mgy22jx.mongodb.net/test"
-        CONNECTION_STRING = f"mongodb+srv://root:root@cluster0.mgy22jx.mongodb.net/test"
-
+        #CONNECTION_STRING = f"mongodb+srv://root:root@cluster0.mgy22jx.mongodb.net/test"
+        CONNECTION_STRING  = f"mongodb://{self.db_user}:{self.db_password}@104.248.137.224:1547"
+        #CONNECTION_STRING = f"mongodb+srv://root:root@cluster0.mgy22jx.mongodb.net/test"
         #CONNECTION_STRING = f"mongodb+srv://{self.db_user}:{self.db_password}@{self.db_password}"
+
         self.db_client = MongoClient(CONNECTION_STRING,
                                      serverSelectionTimeoutMS=10000,
                                      connectTimeoutMS=200000)
@@ -157,8 +161,8 @@ class RnDaoAnalyzer:
             heatmap_dict["reacter"] = heatmap["reacter"]
             heatmap_dict["reacted"] = heatmap["reacted"]
             heatmap_dict["account_names"] = account_list
-
-            heatmap_c.insert_one(heatmap_dict)
+            if not self.testing:
+                heatmap_c.insert_one(heatmap_dict)
 
             # analyze next day
             last_date = last_date + timedelta(days=1)

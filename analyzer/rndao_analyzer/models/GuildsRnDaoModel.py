@@ -12,10 +12,11 @@ class GuildsRnDaoModel(BaseModel):
         super().__init__(
             collection_name="guilds",
             database=database)
+        print(self.database[self.collection_name].find_one())
 
     def get_connected_guilds(self):
         """
         Returns the list of the connected guilds
         """
-        guilds = self.database[self.collection_name].find({"$isDisconnected":False},{"name":1})
-        return [x["name"] for x in guilds ]
+        guilds = self.database[self.collection_name].find({"isDisconnected":False},{"guildId":1})
+        return [x["guildId"] for x in guilds ]
