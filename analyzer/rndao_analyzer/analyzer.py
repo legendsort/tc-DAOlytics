@@ -8,6 +8,7 @@ from models.RawInfoModel import RawInfoModel
 from datetime import datetime, timedelta, timezone
 from analysis.activity_hourly import activity_hourly
 import logging
+import json
 from dateutil import tz
 
 
@@ -105,11 +106,13 @@ class RnDaoAnalyzer:
             raise Exception(f"Collection '{rawinfo_c.collection_name}' does not exist")
 
 
-        for document in rawinfo_c.get_all():
-            print(document)
+        # for document in rawinfo_c.get_all():
+        #     print(document)
 
-        for document in heatmap_c.get_all():
-            print(document)
+        # print("################################################")
+
+        # for document in heatmap_c.get_all():
+        #     print(document)
 
         # The last date heatmap created for
         last_date = heatmap_c.get_last_date()
@@ -122,17 +125,19 @@ class RnDaoAnalyzer:
             last_date.replace(tzinfo=timezone.utc)
 
         # Generate heatmap for the days between the last_date and today
-        rawinfo_c.test_get()
+        #rawinfo_c.test_get()
         while last_date.astimezone() < datetime.now().astimezone()-timedelta(days=1):
             print(last_date)
-            last_date = last_date + timedelta(days=1)
             entries = rawinfo_c.get_day_entries(last_date)
             if len(entries)==0:
+                # analyze next day
+                last_date = last_date + timedelta(days=1)
                 continue
-            print("ANALYZING")
+
             #Prepare the list
             prepared_list = []
             account_list = []
+
             for entry in entries:
                 prepared_list.append(
                     {
@@ -152,11 +157,28 @@ class RnDaoAnalyzer:
                 for account in entry["user_Mentions"]:
                     if account not in account_list:
                         account_list.append(account)
-            print(account_list)
-            print(activity_hourly(prepared_list, acc_names=account_list))
 
+            activity = activity_hourly(prepared_list, acc_names=account_list)
+            warnings = activity[0]
+            heatmap = activity[1][0]
+            # Parsing the activity_hourly into the dictionary
+            heatmap_dict = {}
+            heatmap_dict["date"] = heatmap["date"]
+            heatmap_dict["channel"] = heatmap["channel"]
+            heatmap_dict["thr_messages"] = heatmap["thr_messages"]
+            heatmap_dict["lone_messages"] = heatmap["lone_messages"]
+            heatmap_dict["replier"] = heatmap["replier"]
+            heatmap_dict["replied"] = heatmap["replied"]
+            heatmap_dict["mentioner"] = heatmap["mentioner"]
+            heatmap_dict["mentioned"] = heatmap["mentioned"]
+            heatmap_dict["reacter"] = heatmap["reacter"]
+            heatmap_dict["reacted"] = heatmap["reacted"]
+            heatmap_dict["account_names"] = account_list
 
+            heatmap_c.insert_one(heatmap_dict)
 
+            # analyze next day
+            last_date = last_date + timedelta(days=1)
 
 
     def _analyze(self, guild):
@@ -185,7 +207,9 @@ class RnDaoAnalyzer:
             raise Exceptino(f"Collection '{rawinfo_c.collection_name}' does not exist")
 
         for document in rawinfo_c.get_all():
+            print("--------------------------------------------------")
             print(document)
+            print("--------------------------------------------------")
 
 
     def _test(self):
