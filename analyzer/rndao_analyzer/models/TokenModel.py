@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 import logging
-from typing import TypedDict
 
-class TokenModel():
+from typing import TypedDict
+from models.BaseModel import BaseModel
+
+class TokenModel(BaseModel):
     def __init__(self, database=None):
         if database is None:
-            logging.info("Database does not exist.")
+            logging.exception("Database does not exist.")
             raise Exception("Database should not be None")
-        self.database = database
-        self.collection_name = "token"
-        self.exists = False
+        super().__init__(
+            collection_name="token",
+            database=database)
         self.validator = { #TIMESTAMPS MISSING!
             "$jsonSchema" :{
                 "bsonType": "object",

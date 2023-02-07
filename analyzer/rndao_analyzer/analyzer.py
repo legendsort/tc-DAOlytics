@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
+import logging
+import json
+
 from pymongo.errors import ConnectionFailure
 from pymongo import MongoClient
+from datetime import datetime, timedelta, timezone
+from dateutil import tz
+# Database models
 from models.UserModel import UserModel
 from models.GuildModel import GuildModel
 from models.HeatMapModel import HeatMapModel
 from models.RawInfoModel import RawInfoModel
-from datetime import datetime, timedelta, timezone
-from analysis.activity_hourly import activity_hourly
-import logging
-import json
-from dateutil import tz
+from models.GuildsRnDaoModel import GuildsRnDaoModel
 
+# Activity hourly
+from analysis.activity_hourly import activity_hourly
 
 class RnDaoAnalyzer:
     """
@@ -30,13 +34,6 @@ class RnDaoAnalyzer:
         self.db_user = ""
         """ Database user password -- TODO: Safe implementation to extract user info from env?"""
         self.db_password = ""
-        """ Analysis frequency: if -1 then its infinite"""
-        self.models = []
-        self.collections = {
-            "user": None,
-            "guild":None,
-            "heatmap":None,
-        }
 
 
     def set_database_info(self, db_url:str="",db_user:str="",db_password:str=""):
@@ -61,11 +58,6 @@ class RnDaoAnalyzer:
                                      serverSelectionTimeoutMS=10000,
                                      connectTimeoutMS=200000)
 
-        # Model creation
-        #print(self.db_client.RnDAO.list_collection_names())
-        # self.collections["user"] = UserModel(self.db_client.RnDAO)
-        # self.collections["guild"] = GuildModel(self.db_client.RnDAO)
-        # self.collections["heatmap"] = HeatMapModel(self.db_client.RnDAO)
 
     def database_connection_test(self):
         """ Test database connection """
@@ -73,18 +65,21 @@ class RnDaoAnalyzer:
             # The ping command is cheap and does not require auth.
             self.db_client.admin.command('ping')
         except ConnectionFailure:
-            print("Server not available")
+            logging.error("Server not available")
             return
-        """TODO: Test the authentication"""
-        print("Databases:")
-        print(self.db_client.list_database_names())
-        print("Guild 1")
-        print(self.db_client["guildId#1"].list_collection_names())
+        #print(self.db_client["guildId#1"].list_collection_names())
 
-
-    def run_once(self, guild):
+    def run_once(self):
         """ Run analysis once (Wrapper)"""
-        self._analyze(guild)
+        guilds_c = GuildsRnDaoModel(self.db_client["RnDAO"])
+        guilds = guilds_c.get_connected_guilds()
+
+        for guild in guilds:
+            self.analysis_heatmap(guild)
+
+    def get_guilds(self):
+        """Returns the list of all guilds"""
+        print(rawinfo_c.database.list_collection_names())
 
     def analysis_heatmap(self, guild):
         """
@@ -100,24 +95,12 @@ class RnDaoAnalyzer:
         rawinfo_c = RawInfoModel(self.db_client[guild])
         heatmap_c = HeatMapModel(self.db_client[guild])
 
-        if not heatmap_c.is_present():
+        if not heatmap_c.collection_exists():
             raise Exception(f"Collection '{heatmap_c.collection_name}' does not exist")
-        if not rawinfo_c.is_present():
+        if not rawinfo_c.collection_exists():
             raise Exception(f"Collection '{rawinfo_c.collection_name}' does not exist")
 
-
-        # for document in rawinfo_c.get_all():
-        #     print(document)
-
-        # print("################################################")
-
-        # for document in heatmap_c.get_all():
-        #     print(document)
-
-        # The last date heatmap created for
         last_date = heatmap_c.get_last_date()
-        #last_date = None
-        #last_date = datetime(2023,1,1,0,0,0).astimezone()
         if last_date == None:
             # If no heatmap was created, than tha last date is the first
             # rawdata entry
@@ -181,43 +164,6 @@ class RnDaoAnalyzer:
             last_date = last_date + timedelta(days=1)
 
 
-    def _analyze(self, guild):
-        """
-        Run analysis once (private function)
-        """
-        """TODO
-        1.) Get the data from the MongoDB
-        2.) Parse the data
-        3.) Run the analysis scripts on the data
-        4.) Push the data back into the MongoDB
-        """
-
-        if not guild in self.db_client.list_database_names():
-            raise Exception("Chosen database does not exist")
-        else:
-            print("Database exists")
-
-        # Collections involved in analysis
-        rawinfo_c = RawInfoModel(self.db_client[guild])
-        heatmap_c = HeatMapModel(self.db_client[guild])
-
-        if not heatmap_c.is_present():
-            raise Exceptino(f"Collection '{heatmap_c.collection_name}' does not exist")
-        if not rawinfo_c.is_present():
-            raise Exceptino(f"Collection '{rawinfo_c.collection_name}' does not exist")
-
-        for document in rawinfo_c.get_all():
-            print("--------------------------------------------------")
-            print(document)
-            print("--------------------------------------------------")
-
-
-    def _test(self):
-        """
-        A small function to test functionalities when developing.
-        Will be removed afterwards
-        """
-
 
 
 
@@ -237,6 +183,4 @@ if __name__ == "__main__":
         db_user=user
     )
     analyzer.database_connect()
-    #analyzer.database_connection_test()
-    #analyzer._test()
-    analyzer.analysis_heatmap('guildId#1')
+    analyzer.run_once()
