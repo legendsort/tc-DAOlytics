@@ -116,8 +116,8 @@ class RnDaoAnalyzer:
 
         # The last date heatmap created for
         last_date = heatmap_c.get_last_date()
-        last_date = None
-        last_date = datetime(2023,1,1,0,0,0).astimezone()
+        #last_date = None
+        #last_date = datetime(2023,1,1,0,0,0).astimezone()
         if last_date == None:
             # If no heatmap was created, than tha last date is the first
             # rawdata entry
