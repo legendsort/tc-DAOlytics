@@ -35,7 +35,7 @@ class RnDaoAnalyzer:
         """ Database user password -- TODO: Safe implementation to extract user info from env?"""
         self.db_password = ""
         """ Testing, prevents from data upload"""
-        self.testing = True
+        self.testing = False
 
 
     def set_database_info(self, db_url:str="",db_user:str="",db_password:str=""):
@@ -77,7 +77,7 @@ class RnDaoAnalyzer:
         """ Run analysis once (Wrapper)"""
         guilds_c = GuildsRnDaoModel(self.db_client["RnDAO"])
         guilds = guilds_c.get_connected_guilds()
-
+        logging.info(f"Creating heatmaps for {guilds}")
         for guild in guilds:
             self.analysis_heatmap(guild)
 
@@ -91,11 +91,14 @@ class RnDaoAnalyzer:
         """
         #activity_hourly()
         if not guild in self.db_client.list_database_names():
-            raise Exception("Chosen database does not exist")
-        else:
-            print("Database exists")
+            #print(f"Existing databases: {self.db_client.list_database_names()}")
+            logging.error(f"Database {guild} doesn't exist")
+            logging.error(f"Existing databases: {self.db_client.list_database_names()}")
+            logging.info("Continuing")
+            return
 
         # Collections involved in analysis
+        # guild parameter is the name of the database
         rawinfo_c = RawInfoModel(self.db_client[guild])
         heatmap_c = HeatMapModel(self.db_client[guild])
 

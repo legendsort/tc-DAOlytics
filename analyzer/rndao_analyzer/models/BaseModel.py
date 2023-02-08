@@ -18,7 +18,6 @@ class BaseModel():
         returns True if collection with this name exists in the
         database
         """
-        print(self.database.list_collection_names())
         if self.collection_name in self.database.list_collection_names():
             return True
         else:
