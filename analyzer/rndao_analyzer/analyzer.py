@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import logging
 import json
+import os
 
 from pymongo.errors import ConnectionFailure
 from pymongo import MongoClient
@@ -29,6 +30,7 @@ class RnDaoAnalyzer:
         self.db_client = None
         """ Database URL """
         self.db_url = ""
+        self.db_host = ""
         """ Database user -- TODO: Safe implementation to extract user info from env?"""
         """ Use a function instead of the string"""
         self.db_user = ""
@@ -38,13 +40,14 @@ class RnDaoAnalyzer:
         self.testing = False
 
 
-    def set_database_info(self, db_url:str="",db_user:str="",db_password:str=""):
+    def set_database_info(self,db_host:str="", db_url:str="",db_user:str="",db_password:str=""):
         """
         Database information setter
         """
         self.db_url=db_url
         self.db_user = db_user
         self.db_password = db_password
+        self.db_host = db_host
 
 
     def database_connect(self):
@@ -54,7 +57,7 @@ class RnDaoAnalyzer:
         """ Connection String will be modified once the url is provided"""
         #CONNECTION_STRING = f"mongodb+srv://{self.db_user}:{self.db_password}@cluster0.mgy22jx.mongodb.net/test"
         #CONNECTION_STRING = f"mongodb+srv://root:root@cluster0.mgy22jx.mongodb.net/test"
-        CONNECTION_STRING  = f"mongodb://{self.db_user}:{self.db_password}@104.248.137.224:1547"
+        CONNECTION_STRING  = f"mongodb://{self.db_user}:{self.db_password}@{self.db_host}"
         #CONNECTION_STRING = f"mongodb+srv://root:root@cluster0.mgy22jx.mongodb.net/test"
         #CONNECTION_STRING = f"mongodb+srv://{self.db_user}:{self.db_password}@{self.db_password}"
 
@@ -183,9 +186,13 @@ if __name__ == "__main__":
     #url="cluster0.prmgz21.mongodb.net/test",
     user = "tcmongo"
     password = "T0g3th3rCr3wM0ng0P55"
-
+    user = os.getenv("RNDAO_DB_USER")
+    password = os.getenv("RNDAO_DB_PASSWORD")
+    host = os.getenv("RNDAO_DB_HOST")
+    print(user, password, host)
     analyzer.set_database_info(
         db_url="",
+        db_host=host,
         db_password=password,
         db_user=user
     )
