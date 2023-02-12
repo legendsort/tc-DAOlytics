@@ -109,8 +109,5 @@ class HeatMapModel(BaseModel):
                 tzinfo=timezone(timedelta(hours=zone_hrs, minutes=zone_min))
             )
             return date_obj
-        except Exception():
-            print("No database entry with valid field 'date' found")
+        except Exception("No database entry with valid field found"):
             return None
-
-

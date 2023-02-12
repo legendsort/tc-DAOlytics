@@ -55,11 +55,7 @@ class RnDaoAnalyzer:
         Connect to the database
         """
         """ Connection String will be modified once the url is provided"""
-        #CONNECTION_STRING = f"mongodb+srv://{self.db_user}:{self.db_password}@cluster0.mgy22jx.mongodb.net/test"
-        #CONNECTION_STRING = f"mongodb+srv://root:root@cluster0.mgy22jx.mongodb.net/test"
         CONNECTION_STRING  = f"mongodb://{self.db_user}:{self.db_password}@{self.db_host}"
-        #CONNECTION_STRING = f"mongodb+srv://root:root@cluster0.mgy22jx.mongodb.net/test"
-        #CONNECTION_STRING = f"mongodb+srv://{self.db_user}:{self.db_password}@{self.db_password}"
 
         self.db_client = MongoClient(CONNECTION_STRING,
                                      serverSelectionTimeoutMS=10000,
@@ -181,11 +177,6 @@ if __name__ == "__main__":
     logging.basicConfig()
     logging.getLogger().setLevel(logging.INFO)
     analyzer = RnDaoAnalyzer()
-    #user = "rndaotest"
-    #password = "kb9oQKppqEXo6yJ6"
-    #url="cluster0.prmgz21.mongodb.net/test",
-    user = "tcmongo"
-    password = "T0g3th3rCr3wM0ng0P55"
     user = os.getenv("RNDAO_DB_USER")
     password = os.getenv("RNDAO_DB_PASSWORD")
     host = os.getenv("RNDAO_DB_HOST")

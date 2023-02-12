@@ -9,6 +9,8 @@ In future this will make it easier to integrate into services runable on the ser
 
 * Running the program
 
+
+
 ** Installing the python package
 Inside of the analyzer directory:
 
@@ -50,3 +52,19 @@ a.run_forever()
 #+end_src
 
 /This can also be done with a crontab./
+* Running without the package
+
+Install the packages from the requirements.txt (in rndao_analyzer)
+
+Create the environment variables
+#+begin_src bash
+RNDAO_DB_USER=user
+RNDAO_DB_PASSWORD=password
+RNDAO_DB_HOST=host:port
+#+end_src
+
+The expected mongo url string is in the following format:
+#+begin_src bash
+f"mongodb://{self.db_user}:{self.db_password}@{self.db_host}"
+#+end_src
+where python script replaces the variables with actual values
