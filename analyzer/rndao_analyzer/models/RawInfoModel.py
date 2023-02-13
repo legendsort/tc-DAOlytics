@@ -74,7 +74,17 @@ class RawInfoModel(BaseModel):
         if len(valid_entries) == 0:
             raise Exception("RawInfo collection has no entries with 'created_at' value")
         sorted_entries = sorted(valid_entries, key=lambda t: t["created_at"])
-        return sorted_entries[0]["created_at"]
+        date_str = sorted_entries[0]["timestampe"]
+        date_str = date_str.split(" GMT")
+        date_str[1] = "GMT"+date_str[1]
+        date_str[1] = date_str[1].split(" ")[0].replace("GMT","")
+        zone = [date_str[1][0:3], date_str[1][3::]]
+        zone_hrs = int(zone[0])
+        zone_min = int(zone[1])
+        date_obj = datetime.strptime(date_str[0], "%a %b %d %Y %H:%M:%S").replace(
+            tzinfo=timezone(timedelta(hours=zone_hrs, minutes=zone_min))
+        )
+        return date_obj
 
     def get_day_entries(self, day):
         """
