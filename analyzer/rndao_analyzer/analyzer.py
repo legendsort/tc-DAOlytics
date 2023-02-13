@@ -133,7 +133,7 @@ class RnDaoAnalyzer:
                         "datetime": entry["datetime"],# .strftime('%Y-%m-%d %H:%M'),
                         "channel" : entry["channel"],
                         "author"  : entry["author"],
-                        "replied_user": None, #entry["replied_User"],
+                        "replied_user": entry["replied_user"],
                         "user_mentions": entry["user_mentions"],
                         "reactions" : entry["reactions"],
                         "thread" : entry["thread"],
