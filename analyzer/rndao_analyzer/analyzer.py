@@ -130,13 +130,13 @@ class RnDaoAnalyzer:
             for entry in entries:
                 prepared_list.append(
                     {
-                        "datetime": entry["created_at"].strftime('%Y-%m-%d %H:%M'),
-                        "channel" : entry["channelId"],
+                        "datetime": entry["datetime"],# .strftime('%Y-%m-%d %H:%M'),
+                        "channel" : entry["channel"],
                         "author"  : entry["author"],
                         "replied_user": entry["replied_User"],
-                        "user_mentions": entry["user_Mentions"],
+                        "user_mentions": None, #entry["user_mentions"],
                         "reactions" : entry["reactions"],
-                        "thread" : None,
+                        "thread" : entry["thread"],
                         "mess_type": entry["type"],
                     }
                 )

@@ -51,8 +51,8 @@ class RawInfoModel(BaseModel):
                     "reference_Message" :{
                         "bsonType":"int"
                     },
-                    "created_at":{
-                        "bsonType": "date",
+                    "datetime":{
+                        "bsonType": "string",
                     },
                     "channelId":{
                         "bsonType": "string",
@@ -70,20 +70,16 @@ class RawInfoModel(BaseModel):
         This is RawInfo specific method
         """
         all_entries = self.database[self.collection_name].find()#.sort([("created_at", pymongo.ASCENDING)]).limit(1)[0]["created_at"]
-        valid_entries = [x for x in all_entries if "created_at" in x.keys()]
+        valid_entries = [x for x in all_entries if "datetime" in x.keys()]
+
         if len(valid_entries) == 0:
-            raise Exception("RawInfo collection has no entries with 'created_at' value")
-        sorted_entries = sorted(valid_entries, key=lambda t: t["created_at"])
-        date_str = sorted_entries[0]["timestampe"]
-        date_str = date_str.split(" GMT")
-        date_str[1] = "GMT"+date_str[1]
-        date_str[1] = date_str[1].split(" ")[0].replace("GMT","")
-        zone = [date_str[1][0:3], date_str[1][3::]]
-        zone_hrs = int(zone[0])
-        zone_min = int(zone[1])
-        date_obj = datetime.strptime(date_str[0], "%a %b %d %Y %H:%M:%S").replace(
-            tzinfo=timezone(timedelta(hours=zone_hrs, minutes=zone_min))
-        )
+            raise Exception("RawInfo collection has no entries with 'datetime' value")
+
+        sorted_entries = sorted(valid_entries, key=lambda t: int(t["datetime"].replace("-","")))
+
+        date_str = sorted_entries[0]["datetime"]
+        date_obj = datetime.strptime(date_str[0], "%Y-%m-%d")
+
         return date_obj
 
     def get_day_entries(self, day):
@@ -96,6 +92,8 @@ class RawInfoModel(BaseModel):
 
         logging.info(f"Fetching the documents {self.database.name} | {self.collection_name}: {start_day} -> {end_day}")
 
+        date_str = day.strftime("%Y-%m-%d")
+
         entries = self.database[self.collection_name].find(
-            {'created_at':{'$gte':start_day, '$lt':end_day}})
+            {'datetime': date_str})
         return list(entries)
