@@ -82,6 +82,12 @@ class RawInfoModel(BaseModel):
 
         return date_obj
 
+    def count(self):
+        """
+        Returns the number of entries in this collection
+        """
+        return self.database[self.collection_name].count_documents({})
+
     def get_day_entries(self, day):
         """
         Gets the list of entries for the stated day

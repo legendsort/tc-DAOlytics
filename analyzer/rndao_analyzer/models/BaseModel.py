@@ -67,3 +67,9 @@ class BaseModel():
         """
 
         return self.database[self.collection_name].find()
+
+    def count(self):
+        """
+        Returns the number of entries in this collection
+        """
+        return self.database[self.collection_name].count_documents({})

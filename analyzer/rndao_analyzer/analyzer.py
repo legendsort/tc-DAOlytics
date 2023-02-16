@@ -31,6 +31,7 @@ class RnDaoAnalyzer:
         """ Database URL """
         self.db_url = ""
         self.db_host = ""
+        self.db_port = ""
         """ Database user -- TODO: Safe implementation to extract user info from env?"""
         """ Use a function instead of the string"""
         self.db_user = ""
@@ -40,7 +41,7 @@ class RnDaoAnalyzer:
         self.testing = False
 
 
-    def set_database_info(self,db_host:str="", db_url:str="",db_user:str="",db_password:str=""):
+    def set_database_info(self,db_host:str="", db_url:str="",db_user:str="",db_password:str="", db_port:str=""):
         """
         Database information setter
         """
@@ -48,6 +49,7 @@ class RnDaoAnalyzer:
         self.db_user = db_user
         self.db_password = db_password
         self.db_host = db_host
+        self.db_port = db_port
 
 
     def database_connect(self):
@@ -55,7 +57,7 @@ class RnDaoAnalyzer:
         Connect to the database
         """
         """ Connection String will be modified once the url is provided"""
-        CONNECTION_STRING  = f"mongodb://{self.db_user}:{self.db_password}@{self.db_host}"
+        CONNECTION_STRING  = f"mongodb://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}"
 
         self.db_client = MongoClient(CONNECTION_STRING,
                                      serverSelectionTimeoutMS=10000,
@@ -101,12 +103,18 @@ class RnDaoAnalyzer:
         rawinfo_c = RawInfoModel(self.db_client[guild])
         heatmap_c = HeatMapModel(self.db_client[guild])
 
+        # Testing if there are entries in the rawinfo collection
+        if rawinfo_c.count() == 0:
+            logging.error(f"No entries in the collection 'rawinfos' in {guild} databse")
+            return
+
         if not heatmap_c.collection_exists():
             raise Exception(f"Collection '{heatmap_c.collection_name}' does not exist")
         if not rawinfo_c.collection_exists():
             raise Exception(f"Collection '{rawinfo_c.collection_name}' does not exist")
 
         last_date = heatmap_c.get_last_date()
+
         if last_date == None:
             # If no heatmap was created, than tha last date is the first
             # rawdata entry
@@ -177,15 +185,17 @@ if __name__ == "__main__":
     logging.basicConfig()
     logging.getLogger().setLevel(logging.INFO)
     analyzer = RnDaoAnalyzer()
-    user = os.getenv("RNDAO_DB_USER")
-    password = os.getenv("RNDAO_DB_PASSWORD")
-    host = os.getenv("RNDAO_DB_HOST")
+    user = os.getenv("DB_USER")
+    password = os.getenv("DB_PASSWORD")
+    host = os.getenv("DB_HOST")
+    port = os.getenv("DB_PORT")
     print(user, password, host)
     analyzer.set_database_info(
         db_url="",
         db_host=host,
         db_password=password,
-        db_user=user
+        db_user=user,
+        db_port=port
     )
     analyzer.database_connect()
     analyzer.run_once()
