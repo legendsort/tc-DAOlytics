@@ -127,7 +127,7 @@ class RnDaoAnalyzer:
         # rawinfo_c.test_get()
         print(last_date)
 
-        while last_date.astimezone() < datetime.now().astimezone():  # -timedelta(days=1):
+        while last_date.astimezone() < datetime.now().astimezone() - timedelta(days=1):
             logging.info(f"Last date: {last_date}")
             entries = rawinfo_c.get_day_entries(last_date)
             if len(entries) == 0:
