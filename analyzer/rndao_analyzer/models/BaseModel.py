@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+import logging
 
 
 class BaseModel():
@@ -7,6 +7,7 @@ class BaseModel():
     BaseModel description
     All integrated models inherit from this object
     """
+
     def __init__(self, collection_name, database):
         self.collection_name = collection_name
         self.database = database
@@ -32,25 +33,30 @@ class BaseModel():
             if not self.exists:
                 self._create_collection_if_not_else()
 
-        if not self.exists:
-            logging.info(f"Inserting guild object into the {self.collection_name} collection failed: Collection does not exist")
+        if not self.collection_exists():
+            logging.info(
+                f"Inserting guild object into the {self.collection_name} collection failed: Collection does not exist")
             return
+        self.collection = self.database[self.collection_name]
+        logging.info(
+            f"Inserting guild object into the {self.collection_name} collection.")
 
-        logging.info(f"Inserting guild object into the {self.collection_name} collection.")
         return self.collection.insert_one(obj_dict)
 
     def _create_collection_if_not_exists(self):
         """
         Creates the collection with specified name if it does not exist
         """
-        logging.info(f"Check if collection {self.collection_name} exists in database")
+        logging.info(
+            f"Check if collection {self.collection_name} exists in database")
         if self.collection_name in self.database.list_collection_names():
-           logging.info(f"Collection {self.collection_name} exists")
+            logging.info(f"Collection {self.collection_name} exists")
         else:
-           logging.info(f"Collection {self.collection_name} doesn't exist")
-           result = self.database.create_collection(self.collection_name)
-           logging.info(result)
-        self.database.command("collMod", self.collection_name, validator=self.validator)
+            logging.info(f"Collection {self.collection_name} doesn't exist")
+            result = self.database.create_collection(self.collection_name)
+            logging.info(result)
+        self.database.command(
+            "collMod", self.collection_name, validator=self.validator)
         self.collection = self.database[self.collection_name]
         self.exists = True
 

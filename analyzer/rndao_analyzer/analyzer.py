@@ -16,12 +16,15 @@ from models.GuildsRnDaoModel import GuildsRnDaoModel
 
 # Activity hourly
 from analysis.activity_hourly import activity_hourly
+from dotenv import load_dotenv
+
 
 class RnDaoAnalyzer:
     """
     RnDaoAnalyzer
     class that handles database connection and data analysis
     """
+
     def __init__(self):
         """
         Class initiation function
@@ -39,28 +42,25 @@ class RnDaoAnalyzer:
         """ Testing, prevents from data upload"""
         self.testing = False
 
-
-    def set_database_info(self,db_host:str="", db_url:str="",db_user:str="",db_password:str=""):
+    def set_database_info(self, db_host: str = "", db_url: str = "", db_user: str = "", db_password: str = ""):
         """
         Database information setter
         """
-        self.db_url=db_url
+        self.db_url = db_url
         self.db_user = db_user
         self.db_password = db_password
         self.db_host = db_host
-
 
     def database_connect(self):
         """
         Connect to the database
         """
         """ Connection String will be modified once the url is provided"""
-        CONNECTION_STRING  = f"mongodb://{self.db_user}:{self.db_password}@{self.db_host}"
+        CONNECTION_STRING = f"mongodb://{self.db_user}:{self.db_password}@{self.db_host}"
 
         self.db_client = MongoClient(CONNECTION_STRING,
                                      serverSelectionTimeoutMS=10000,
                                      connectTimeoutMS=200000)
-
 
     def database_connection_test(self):
         """ Test database connection """
@@ -70,7 +70,7 @@ class RnDaoAnalyzer:
         except ConnectionFailure:
             logging.error("Server not available")
             return
-        #print(self.db_client["guildId#1"].list_collection_names())
+        # print(self.db_client["guildId#1"].list_collection_names())
 
     def run_once(self):
         """ Run analysis once (Wrapper)"""
@@ -88,11 +88,12 @@ class RnDaoAnalyzer:
         """
         Based on the rawdata creates and stores the heatmap data
         """
-        #activity_hourly()
+        # activity_hourly()
         if not guild in self.db_client.list_database_names():
-            #print(f"Existing databases: {self.db_client.list_database_names()}")
+            # print(f"Existing databases: {self.db_client.list_database_names()}")
             logging.error(f"Database {guild} doesn't exist")
-            logging.error(f"Existing databases: {self.db_client.list_database_names()}")
+            logging.error(
+                f"Existing databases: {self.db_client.list_database_names()}")
             logging.info("Continuing")
             return
 
@@ -102,9 +103,11 @@ class RnDaoAnalyzer:
         heatmap_c = HeatMapModel(self.db_client[guild])
 
         if not heatmap_c.collection_exists():
-            raise Exception(f"Collection '{heatmap_c.collection_name}' does not exist")
+            raise Exception(
+                f"Collection '{heatmap_c.collection_name}' does not exist")
         if not rawinfo_c.collection_exists():
-            raise Exception(f"Collection '{rawinfo_c.collection_name}' does not exist")
+            raise Exception(
+                f"Collection '{rawinfo_c.collection_name}' does not exist")
 
         last_date = heatmap_c.get_last_date()
         if last_date == None:
@@ -114,38 +117,40 @@ class RnDaoAnalyzer:
             last_date.replace(tzinfo=timezone.utc)
 
         # Generate heatmap for the days between the last_date and today
-        #rawinfo_c.test_get()
+        # rawinfo_c.test_get()
+        print(last_date)
         while last_date.astimezone() < datetime.now().astimezone()-timedelta(days=1):
-            print(last_date)
             entries = rawinfo_c.get_day_entries(last_date)
-            if len(entries)==0:
+            if len(entries) == 0:
                 # analyze next day
                 last_date = last_date + timedelta(days=1)
                 continue
 
-            #Prepare the list
+            # Prepare the list
             prepared_list = []
             account_list = []
 
             for entry in entries:
                 prepared_list.append(
                     {
-                        "datetime": entry["datetime"],# .strftime('%Y-%m-%d %H:%M'),
-                        "channel" : entry["channel"],
-                        "author"  : entry["author"],
+                        # .strftime('%Y-%m-%d %H:%M'),
+                        "datetime": entry["datetime"],
+                        "channel": entry["channel"],
+                        "author": entry["author"],
                         "replied_user": entry["replied_user"],
                         "user_mentions": entry["user_mentions"],
-                        "reactions" : entry["reactions"],
-                        "thread" : entry["thread"],
+                        "reactions": entry["reactions"],
+                        "thread": entry["thread"],
                         "mess_type": entry["type"],
                     }
                 )
                 if not entry["author"] in account_list:
                     account_list.append(entry["author"])
 
-                for account in entry["user_Mentions"]:
-                    if account not in account_list:
-                        account_list.append(account)
+                if entry["user_mentions"] != None:
+                    for account in entry["user_mentions"]:
+                        if account not in account_list:
+                            account_list.append(account)
 
             activity = activity_hourly(prepared_list, acc_names=account_list)
             warnings = activity[0]
@@ -170,10 +175,9 @@ class RnDaoAnalyzer:
             last_date = last_date + timedelta(days=1)
 
 
-
-
-
 if __name__ == "__main__":
+    load_dotenv()
+
     logging.basicConfig()
     logging.getLogger().setLevel(logging.INFO)
     analyzer = RnDaoAnalyzer()
