@@ -73,15 +73,13 @@ class RawInfoModel(BaseModel):
         valid_entries = [x for x in all_entries if "datetime" in x.keys()]
 
         if len(valid_entries) == 0:
-            raise Exception(
-                "RawInfo collection has no entries with 'datetime' value")
-
-        sorted_entries = sorted(valid_entries, key=lambda t: t["datetime"])
+            raise Exception("RawInfo collection has no entries with 'datetime' value")
+        sorted_entries = sorted(valid_entries, key=lambda t: int(t["datetime"].replace("-","").replace(":","").replace(" ","")))
         date_str = sorted_entries[0]["datetime"]
-
         date_obj = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
 
         return date_obj
+
 
     def get_day_entries(self, day):
         """
