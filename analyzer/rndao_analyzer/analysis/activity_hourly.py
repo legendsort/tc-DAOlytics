@@ -12,7 +12,18 @@ import json
 import numpy as np
 
 
+def parse_reaction(s):
+    result = []
+    for subitem in s:
+        items = subitem.split(',')
+        parsed_items = []
+        for item in items:
+            parsed_items.append(item)
+        result.append(parsed_items)
+    return result
+
 # # # # # main function # # # # #
+
 
 def activity_hourly(json_file, out_file_name=None, acc_names=[],
                     mess_substring=None, emoji_types=None):
@@ -78,6 +89,8 @@ def activity_hourly(json_file, out_file_name=None, acc_names=[],
             mess_auth = mess["author"]
             rep_auth = mess["replied_user"]
 
+            reactions = parse_reaction(mess["reactions"])
+
             try:
                 # obtain index of author in acc_names
                 auth_i = acc_names.index(mess_auth)
@@ -109,7 +122,7 @@ def activity_hourly(json_file, out_file_name=None, acc_names=[],
             # # # count activity per hour # # #
 
             # count reactions
-            n_reac, reacting_accs, warning_count = count_reactions(mess["reactions"],
+            n_reac, reacting_accs, warning_count = count_reactions(reactions,
                                                                    emoji_types, mess_auth, warning_count)
 
             # add n_reac to hour of message that received the emoji
@@ -421,7 +434,6 @@ def count_reactions(mess_reactions, emoji_types, mess_auth, warning_count):
     emojis reacted by the author of the message are not counted but lead
         to a warning instead
     """
-
     # set number of reactions to 0
     n_reac = 0
 

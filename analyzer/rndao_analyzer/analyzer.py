@@ -43,8 +43,7 @@ class RnDaoAnalyzer:
         """ Testing, prevents from data upload"""
         self.testing = False
 
-
-    def set_database_info(self,db_host:str="", db_url:str="",db_user:str="",db_password:str="", db_port:str=""):
+    def set_database_info(self, db_host: str = "", db_url: str = "", db_user: str = "", db_password: str = "", db_port: str = ""):
         """
         Database information setter
         """
@@ -60,8 +59,7 @@ class RnDaoAnalyzer:
         """
         """ Connection String will be modified once the url is provided"""
 
-        CONNECTION_STRING  = f"mongodb://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}"
-
+        CONNECTION_STRING = f"mongodb://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}"
         self.db_client = MongoClient(CONNECTION_STRING,
                                      serverSelectionTimeoutMS=10000,
                                      connectTimeoutMS=200000)
@@ -85,7 +83,8 @@ class RnDaoAnalyzer:
 
     def get_guilds(self):
         """Returns the list of all guilds"""
-        logging.info(f"Listed guilds {rawinfo_c.database.list_collection_names()}")
+        logging.info(
+            f"Listed guilds {rawinfo_c.database.list_collection_names()}")
 
     def analysis_heatmap(self, guild):
         """
@@ -106,7 +105,8 @@ class RnDaoAnalyzer:
 
         # Testing if there are entries in the rawinfo collection
         if rawinfo_c.count() == 0:
-            logging.error(f"No entries in the collection 'rawinfos' in {guild} databse")
+            logging.error(
+                f"No entries in the collection 'rawinfos' in {guild} databse")
             return
 
         if not heatmap_c.collection_exists():
@@ -126,7 +126,8 @@ class RnDaoAnalyzer:
         # Generate heatmap for the days between the last_date and today
         # rawinfo_c.test_get()
         print(last_date)
-        while last_date.astimezone() < datetime.now().astimezone()-timedelta(days=1):
+
+        while last_date.astimezone() < datetime.now().astimezone():  # -timedelta(days=1):
             logging.info(f"Last date: {last_date}")
             entries = rawinfo_c.get_day_entries(last_date)
             if len(entries) == 0:
@@ -138,6 +139,8 @@ class RnDaoAnalyzer:
             account_list = []
 
             for entry in entries:
+                entry["user_mentions"] = entry["user_mentions"][0].split(",")
+
                 prepared_list.append(
                     {
                         # .strftime('%Y-%m-%d %H:%M'),
