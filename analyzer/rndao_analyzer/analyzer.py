@@ -105,7 +105,7 @@ class RnDaoAnalyzer:
 
         # Testing if there are entries in the rawinfo collection
         if rawinfo_c.count() == 0:
-            logging.error(
+            logging.warning(
                 f"No entries in the collection 'rawinfos' in {guild} databse")
             return
 
@@ -125,10 +125,8 @@ class RnDaoAnalyzer:
 
         # Generate heatmap for the days between the last_date and today
         # rawinfo_c.test_get()
-        print(last_date)
 
         while last_date.astimezone() < datetime.now().astimezone() - timedelta(days=1):
-            logging.info(f"Last date: {last_date}")
             entries = rawinfo_c.get_day_entries(last_date)
             if len(entries) == 0:
                 # analyze next day
@@ -167,7 +165,7 @@ class RnDaoAnalyzer:
             heatmap = activity[1][0]
             # Parsing the activity_hourly into the dictionary
             heatmap_dict = {}
-            heatmap_dict["date"] = heatmap["date"]
+            heatmap_dict["date"] = heatmap["date"][0]
             heatmap_dict["channel"] = heatmap["channel"]
             heatmap_dict["thr_messages"] = heatmap["thr_messages"]
             heatmap_dict["lone_messages"] = heatmap["lone_messages"]
