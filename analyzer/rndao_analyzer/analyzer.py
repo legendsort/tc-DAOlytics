@@ -112,7 +112,6 @@ class RnDaoAnalyzer:
             raise Exception(f"Collection '{rawinfo_c.collection_name}' does not exist")
 
         last_date = heatmap_c.get_last_date()
-
         if last_date == None:
             # If no heatmap was created, than tha last date is the first
             # rawdata entry
@@ -129,6 +128,7 @@ class RnDaoAnalyzer:
                 last_date = last_date + timedelta(days=1)
                 continue
 
+            return
             #Prepare the list
             prepared_list = []
             account_list = []

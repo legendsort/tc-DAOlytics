@@ -74,19 +74,12 @@ class RawInfoModel(BaseModel):
 
         if len(valid_entries) == 0:
             raise Exception("RawInfo collection has no entries with 'datetime' value")
-
-        sorted_entries = sorted(valid_entries, key=lambda t: int(t["datetime"].replace("-","")))
-
+        sorted_entries = sorted(valid_entries, key=lambda t: int(t["datetime"].replace("-","").replace(":","").replace(" ","")))
         date_str = sorted_entries[0]["datetime"]
-        date_obj = datetime.strptime(date_str[0], "%Y-%m-%d")
+        date_obj = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
 
         return date_obj
 
-    def count(self):
-        """
-        Returns the number of entries in this collection
-        """
-        return self.database[self.collection_name].count_documents({})
 
     def get_day_entries(self, day):
         """
