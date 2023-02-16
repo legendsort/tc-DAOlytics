@@ -72,7 +72,6 @@ class RnDaoAnalyzer:
         except ConnectionFailure:
             logging.error("Server not available")
             return
-        #print(self.db_client["guildId#1"].list_collection_names())
 
     def run_once(self):
         """ Run analysis once (Wrapper)"""
@@ -84,7 +83,7 @@ class RnDaoAnalyzer:
 
     def get_guilds(self):
         """Returns the list of all guilds"""
-        print(rawinfo_c.database.list_collection_names())
+        logging.info(f"Listed guilds {rawinfo_c.database.list_collection_names()}")
 
     def analysis_heatmap(self, guild):
         """
@@ -92,7 +91,6 @@ class RnDaoAnalyzer:
         """
         #activity_hourly()
         if not guild in self.db_client.list_database_names():
-            #print(f"Existing databases: {self.db_client.list_database_names()}")
             logging.error(f"Database {guild} doesn't exist")
             logging.error(f"Existing databases: {self.db_client.list_database_names()}")
             logging.info("Continuing")
@@ -124,7 +122,7 @@ class RnDaoAnalyzer:
         # Generate heatmap for the days between the last_date and today
         #rawinfo_c.test_get()
         while last_date.astimezone() < datetime.now().astimezone()-timedelta(days=1):
-            print(last_date)
+            logging.info(f"Last date: {last_date}")
             entries = rawinfo_c.get_day_entries(last_date)
             if len(entries)==0:
                 # analyze next day
@@ -189,7 +187,6 @@ if __name__ == "__main__":
     password = os.getenv("DB_PASSWORD")
     host = os.getenv("DB_HOST")
     port = os.getenv("DB_PORT")
-    print(user, password, host)
     analyzer.set_database_info(
         db_url="",
         db_host=host,
