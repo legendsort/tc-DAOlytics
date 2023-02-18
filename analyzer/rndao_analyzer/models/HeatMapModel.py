@@ -95,7 +95,7 @@ class HeatMapModel(BaseModel):
         """
         try:
             date_str = self.database[self.collection_name].find().sort(
-                [("date", pymongo.DESCENDING)]).limit(1)[0]["date"][0]
+                [("date", pymongo.DESCENDING)]).limit(1)[0]["date"]
             date_obj = datetime.strptime(date_str, "%Y-%m-%d")
 
             return date_obj

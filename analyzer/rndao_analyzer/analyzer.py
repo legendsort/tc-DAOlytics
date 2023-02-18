@@ -152,32 +152,36 @@ class RnDaoAnalyzer:
                         "mess_type": entry["type"],
                     }
                 )
-                if not entry["author"] in account_list:
+                if not entry["author"] in account_list and entry["author"]:
                     account_list.append(entry["author"])
 
                 if entry["user_mentions"] != None:
                     for account in entry["user_mentions"]:
-                        if account not in account_list:
+                        if account not in account_list and account:
                             account_list.append(account)
 
             activity = activity_hourly(prepared_list, acc_names=account_list)
             warnings = activity[0]
             heatmap = activity[1][0]
             # Parsing the activity_hourly into the dictionary
-            heatmap_dict = {}
-            heatmap_dict["date"] = heatmap["date"][0]
-            heatmap_dict["channel"] = heatmap["channel"]
-            heatmap_dict["thr_messages"] = heatmap["thr_messages"]
-            heatmap_dict["lone_messages"] = heatmap["lone_messages"]
-            heatmap_dict["replier"] = heatmap["replier"]
-            heatmap_dict["replied"] = heatmap["replied"]
-            heatmap_dict["mentioner"] = heatmap["mentioner"]
-            heatmap_dict["mentioned"] = heatmap["mentioned"]
-            heatmap_dict["reacter"] = heatmap["reacter"]
-            heatmap_dict["reacted"] = heatmap["reacted"]
-            heatmap_dict["account_names"] = account_list
-            if not self.testing:
-                heatmap_c.insert_one(heatmap_dict)
+            numberOfAccounts = len(account_list)
+
+            for i in range(numberOfAccounts):
+                account = account_list[i]
+                heatmap_dict = {}
+                heatmap_dict["date"] = heatmap["date"][0]
+                heatmap_dict["channel"] = heatmap["channel"][0]
+                heatmap_dict["thr_messages"] = heatmap["thr_messages"][i]
+                heatmap_dict["lone_messages"] = heatmap["lone_messages"][i]
+                heatmap_dict["replier"] = heatmap["replier"][i]
+                heatmap_dict["replied"] = heatmap["replied"][i]
+                heatmap_dict["mentioner"] = heatmap["mentioner"][i]
+                heatmap_dict["mentioned"] = heatmap["mentioned"][i]
+                heatmap_dict["reacter"] = heatmap["reacter"][i]
+                heatmap_dict["reacted"] = heatmap["reacted"][i]
+                heatmap_dict["account_name"] = account
+                if not self.testing:
+                    heatmap_c.insert_one(heatmap_dict)
 
             # analyze next day
             last_date = last_date + timedelta(days=1)
