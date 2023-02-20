@@ -79,11 +79,8 @@ class HeatMapModel(BaseModel):
                             "bsonType": "int"
                         }
                     },
-                    "acc_names": {
-                        "bsonType": "array",
-                        "items": {
-                            "bsonType": "string"
-                        }
+                    "account_name": {
+                        "bsonType": "string",
                     }
                 }
             }

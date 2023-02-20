@@ -71,7 +71,6 @@ def activity_hourly(json_file, out_file_name=None, acc_names=[],
     # add remainder category to acc_names
     acc_names.append("remainder")
     all_day_activity_obj = []
-
     # for each message
     for mess in json_file:
 
@@ -188,14 +187,12 @@ def activity_hourly(json_file, out_file_name=None, acc_names=[],
 
             # if message was sent in thread
             else:
-
                 # if message is default message
                 if mess["mess_type"] == "DEFAULT":
 
                     # add 1 to hour of message
                     all_day_activity_obj[obj_list_i].thr_messages[auth_i,
                                                                   mess_hour] += int(1)
-
                     # add n_men to hour for message sender
                     all_day_activity_obj[obj_list_i].mentioner[auth_i,
                                                                mess_hour] += int(n_men)
@@ -203,7 +200,6 @@ def activity_hourly(json_file, out_file_name=None, acc_names=[],
                     # count raised warnings
                     warning_count[5] += count_from_list(mentioned_accs, acc_names,
                                                         all_day_activity_obj[obj_list_i].mentioned, mess_hour)
-
                 # if message is reply
                 elif mess["mess_type"] == "REPLY":
 
@@ -238,7 +234,6 @@ def activity_hourly(json_file, out_file_name=None, acc_names=[],
     # # # store results    # # #
     # json_out_file = store_results_json([i.asdict() for i in \
     #     all_day_activity_obj], out_file_name)
-
     return (warning_count, [i.asdict() for i in all_day_activity_obj])
 
 
