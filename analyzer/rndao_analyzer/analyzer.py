@@ -86,6 +86,15 @@ class RnDaoAnalyzer:
         logging.info(
             f"Listed guilds {rawinfo_c.database.list_collection_names()}")
 
+    def getNumberOfActions(self, heatmap):
+        sum = 0
+        fields = ["thr_messages", "lone_messages", "replier",
+                  "replied", "mentioned", "mentioner", "reacter", "reacted"]
+        for field in fields:
+            for i in range(24):
+                sum += heatmap[field][i]
+        return sum
+
     def analysis_heatmap(self, guild):
         """
         Based on the rawdata creates and stores the heatmap data
@@ -182,7 +191,8 @@ class RnDaoAnalyzer:
                     heatmap_dict["reacter"] = heatmap["reacter"][i]
                     heatmap_dict["reacted"] = heatmap["reacted"][i]
                     heatmap_dict["account_name"] = account
-                    if not self.testing:
+                    sum = self.getNumberOfActions(heatmap_dict)
+                    if not self.testing and sum > 0:
                         heatmap_c.insert_one(heatmap_dict)
 
             # analyze next day
