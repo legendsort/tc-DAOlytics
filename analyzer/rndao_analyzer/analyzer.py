@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import logging
-import json
 import os
+import sys
 
 from pymongo.errors import ConnectionFailure
 from pymongo import MongoClient
@@ -73,10 +73,11 @@ class RnDaoAnalyzer:
             logging.error("Server not available")
             return
 
-    def run_once(self):
+    def run_once(self, guildId):
         """ Run analysis once (Wrapper)"""
         guilds_c = GuildsRnDaoModel(self.db_client["RnDAO"])
-        guilds = guilds_c.get_connected_guilds()
+        guilds = guilds_c.get_connected_guilds(guildId)
+
         logging.info(f"Creating heatmaps for {guilds}")
         for guild in guilds:
             self.analysis_heatmap(guild)
@@ -198,6 +199,17 @@ class RnDaoAnalyzer:
             # analyze next day
             last_date = last_date + timedelta(days=1)
 
+# get guildId from command, if not given return None
+# python ./analyzer.py guildId
+
+
+def getGuildFromCmd():
+    args = sys.argv
+    guildId = None
+    if len(args) == 2:
+        guildId = args[1]
+    return guildId
+
 
 if __name__ == "__main__":
     load_dotenv()
@@ -216,5 +228,6 @@ if __name__ == "__main__":
         db_user=user,
         db_port=port
     )
+    guildId = getGuildFromCmd()
     analyzer.database_connect()
-    analyzer.run_once()
+    analyzer.run_once(guildId)
