@@ -155,7 +155,7 @@ class RnDaoAnalyzer:
                     {
                         # .strftime('%Y-%m-%d %H:%M'),
                         "datetime": entry["datetime"],
-                        "channel": entry["channel"],
+                        "channel": entry["channelId"],
                         "author": entry["author"],
                         "replied_user": entry["replied_user"],
                         "user_mentions": entry["user_mentions"],
@@ -182,7 +182,7 @@ class RnDaoAnalyzer:
                     account = account_list[i]
                     heatmap_dict = {}
                     heatmap_dict["date"] = heatmap["date"][0]
-                    heatmap_dict["channel"] = heatmap["channel"][0]
+                    heatmap_dict["channelId"] = heatmap["channel"][0]
                     heatmap_dict["thr_messages"] = heatmap["thr_messages"][i]
                     heatmap_dict["lone_messages"] = heatmap["lone_messages"][i]
                     heatmap_dict["replier"] = heatmap["replier"][i]

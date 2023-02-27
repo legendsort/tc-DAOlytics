@@ -22,7 +22,7 @@ class HeatMapModel(BaseModel):
                     "date": {
                         "bsonType": "date",
                     },
-                    "channel": {
+                    "channelId": {
                         "bsonType": "string",
                     },
                     "lone_messages": {

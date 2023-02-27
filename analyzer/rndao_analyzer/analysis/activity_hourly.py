@@ -247,7 +247,7 @@ class DayActivity:
                  reacter, reacted, acc_names):
 
         self.date = date                     # date of object
-        self.channel = channel                # channel of object
+        self.channel = channel                # channel id of object
         # number of lone messages per hour per account
         self.lone_messages = lone_messages
         # number of thread messages per hour per account
