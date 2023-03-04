@@ -7,6 +7,7 @@ from pymongo.errors import ConnectionFailure
 from pymongo import MongoClient
 from datetime import datetime, timedelta, timezone
 from dateutil import tz
+from collections import Counter
 # Database models
 from models.UserModel import UserModel
 from models.GuildModel import GuildModel
@@ -88,13 +89,13 @@ class RnDaoAnalyzer:
             f"Listed guilds {rawinfo_c.database.list_collection_names()}")
 
     def getNumberOfActions(self, heatmap):
-        sum = 0
+        sum_ac = 0
         fields = ["thr_messages", "lone_messages", "replier",
                   "replied", "mentioned", "mentioner", "reacter", "reacted"]
         for field in fields:
             for i in range(24):
-                sum += heatmap[field][i]
-        return sum
+                sum_ac += heatmap[field][i]
+        return sum_ac
 
     def analysis_heatmap(self, guild):
         """
@@ -127,6 +128,7 @@ class RnDaoAnalyzer:
                 f"Collection '{rawinfo_c.collection_name}' does not exist")
 
         last_date = heatmap_c.get_last_date()
+
         if last_date == None:
             # If no heatmap was created, than tha last date is the first
             # rawdata entry
@@ -175,11 +177,9 @@ class RnDaoAnalyzer:
             activity = activity_hourly(prepared_list, acc_names=account_list)
             warnings = activity[0]
             heatmap = activity[1][0]
-            # Parsin the activity_hourly into the dictionary
-            numberOfAccounts = len(account_list)
+            # Parsing the activity_hourly into the dictionary
             for heatmap in activity[1]:
-                for i in range(numberOfAccounts):
-                    account = account_list[i]
+                for i in range(len(account_list)):
                     heatmap_dict = {}
                     heatmap_dict["date"] = heatmap["date"][0]
                     heatmap_dict["channel"] = heatmap["channel"][0]
@@ -191,9 +191,13 @@ class RnDaoAnalyzer:
                     heatmap_dict["mentioned"] = heatmap["mentioned"][i]
                     heatmap_dict["reacter"] = heatmap["reacter"][i]
                     heatmap_dict["reacted"] = heatmap["reacted"][i]
-                    heatmap_dict["account_name"] = account
-                    sum = self.getNumberOfActions(heatmap_dict)
-                    if not self.testing and sum > 0:
+                    heatmap_dict["reacted_per_acc"] = dict(Counter(heatmap["reacted_per_acc"][i]))
+                    heatmap_dict["mentioner_per_acc"] = dict(Counter(heatmap["mentioner_per_acc"][i]))
+                    heatmap_dict["replied_per_acc"] = dict(Counter(heatmap["replied_per_acc"][i]))
+                    heatmap_dict["account_name"] = heatmap["acc_names"][i]
+                    sum_ac = self.getNumberOfActions(heatmap_dict)
+
+                    if not self.testing and sum_ac > 0:
                         heatmap_c.insert_one(heatmap_dict)
 
             # analyze next day
@@ -201,6 +205,8 @@ class RnDaoAnalyzer:
 
 # get guildId from command, if not given return None
 # python ./analyzer.py guildId
+
+
 
 
 def getGuildFromCmd():
