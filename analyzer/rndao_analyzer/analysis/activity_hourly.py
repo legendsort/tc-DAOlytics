@@ -118,11 +118,22 @@ def activity_hourly(json_file, out_file_name=None, acc_names=[],
             all_day_activity_obj, obj_list_i, warning_count = get_obj_list_i(
                 all_day_activity_obj, mess_date, mess_chan, acc_names, warning_count)
 
+
             # # # count activity per hour # # #
 
             # count reactions
             n_reac, reacting_accs, warning_count = count_reactions(reactions,
                                                                    emoji_types, mess_auth, warning_count)
+
+            # if there are any reacting accounts
+            if len(reacting_accs) > 0:
+
+                # for each reacting account
+                for r_a in reacting_accs:
+
+                    # add reacting accounts
+                    all_day_activity_obj[obj_list_i].reacted_per_acc[auth_i].append(r_a)
+
 
             # add n_reac to hour of message that received the emoji
             all_day_activity_obj[obj_list_i].reacted[auth_i,
@@ -135,6 +146,16 @@ def activity_hourly(json_file, out_file_name=None, acc_names=[],
             # count mentions
             n_men, n_rep_men, mentioned_accs, warning_count = count_mentions(mess["user_mentions"],
                                                                              rep_auth, mess_auth, warning_count)
+
+            # if there are any mentioned accounts
+            if len(mentioned_accs) > 0:
+
+                # for each mentioned account
+                for m_a in mentioned_accs:
+
+                    # add mentioned accounts
+                    all_day_activity_obj[obj_list_i].mentioner_per_acc[auth_i].append(m_a)
+
 
             # if message was not sent in thread
             if not mess["thread"]:
@@ -156,6 +177,10 @@ def activity_hourly(json_file, out_file_name=None, acc_names=[],
 
                 # if message is reply
                 elif mess["mess_type"] == "REPLY":
+
+                    # store account name that replied for author of message that was replied to
+                    all_day_activity_obj[obj_list_i].replied_per_acc[rep_i].append(mess_auth)
+
 
                     # add 1 to hour of message for replier
                     all_day_activity_obj[obj_list_i].replier[auth_i,
@@ -203,6 +228,10 @@ def activity_hourly(json_file, out_file_name=None, acc_names=[],
                 # if message is reply
                 elif mess["mess_type"] == "REPLY":
 
+                    # store account name that replied for author of message that was replied to
+                    all_day_activity_obj[obj_list_i].replied_per_acc[rep_i].append(mess_auth)
+
+
                     # add 1 to hour of message for replier
                     all_day_activity_obj[obj_list_i].replier[auth_i,
                                                              mess_hour] += int(1)
@@ -244,7 +273,7 @@ class DayActivity:
     # define constructor
     def __init__(self, date, channel, lone_messages, thr_messages, replier,
                  replied, mentioner, mentioned, rep_mentioner, rep_mentioned,
-                 reacter, reacted, acc_names):
+                 reacter, reacted, reacted_per_acc, mentioner_per_acc, replied_per_acc, acc_names):
 
         self.date = date                     # date of object
         self.channel = channel                # channel id of object
@@ -266,6 +295,12 @@ class DayActivity:
         self.reacter = reacter
         # number of reactions received per hour per account
         self.reacted = reacted
+        # list of account names from which reactions are received per account (duplicates = multiple reactions)
+        self.reacted_per_acc = reacted_per_acc
+        # list of account names that are mentioned by account per account (duplicates = multiple mentions)
+        self.mentioner_per_acc = mentioner_per_acc
+        # list of account names from which replies are received per account (duplicates = multiple replies)
+        self.replied_per_acc = replied_per_acc
         # account names (corresponds to row index of activity types)
         self.acc_names = acc_names
 
@@ -280,7 +315,10 @@ class DayActivity:
                 'replied': self.replied.tolist(), 'mentioner': self.mentioner.tolist(),
                 'mentioned': self.mentioned.tolist(), 'rep_mentioner': self.rep_mentioner.tolist(),
                 'rep_mentioned': self.rep_mentioned.tolist(), 'reacter': self.reacter.tolist(),
-                'reacted': self.reacted.tolist(), 'acc_names': self.acc_names}
+                'reacted': self.reacted.tolist(),  'reacted_per_acc': self.reacted_per_acc,
+                'mentioner_per_acc': self.mentioner_per_acc, 'replied_per_acc': self.replied_per_acc,
+                'acc_names': self.acc_names}
+
 
 
 # # # # # functions # # # # #
@@ -325,6 +363,7 @@ def get_obj_list_i(all_day_activity_obj, mess_date, mess_chan, acc_names, warnin
                 (len(acc_names), 24), dtype=np.int16),
             np.zeros((len(acc_names), 24), dtype=np.int16), np.zeros(
                 (len(acc_names), 24), dtype=np.int16),
+            [[] for _ in range(len(acc_names))], [[] for _ in range(len(acc_names))], [[] for _ in range(len(acc_names))],
             acc_names))
 
         # set list index for message
