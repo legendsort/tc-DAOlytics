@@ -15,7 +15,7 @@ Ene SS Rawa#0855: 0
 remainder: 0
 
 
-Replies: [0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+Replier: [0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
 danielo#2815: 0
 katerinabc#6667: 0
 WaKa#6616: 0
@@ -23,15 +23,15 @@ Ene SS Rawa#0855: 1
 remainder: 0
 
 
-Thread replies: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+Replied: [0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
 danielo#2815: 0
 katerinabc#6667: 0
-WaKa#6616: 0
+WaKa#6616: 1
 Ene SS Rawa#0855: 0
 remainder: 0
 
 
-Mentions: [0 0 0 0 0 0 0 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+Mentioner: [0 0 0 0 0 0 0 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
 danielo#2815: 0
 katerinabc#6667: 0
 WaKa#6616: 0
@@ -39,15 +39,15 @@ Ene SS Rawa#0855: 2
 remainder: 0
 
 
-Thread mentions: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
-danielo#2815: 0
-katerinabc#6667: 0
+Mentioned: [0 0 0 0 0 0 0 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+danielo#2815: 1
+katerinabc#6667: 1
 WaKa#6616: 0
 Ene SS Rawa#0855: 0
 remainder: 0
 
 
-Reply mentions: [0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+Reply mentioner: [0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
 danielo#2815: 0
 katerinabc#6667: 0
 WaKa#6616: 0
@@ -55,14 +55,29 @@ Ene SS Rawa#0855: 1
 remainder: 0
 
 
-Emojis: [0 0 0 0 0 0 0 3 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+Reply mentioned: [0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+danielo#2815: 0
+katerinabc#6667: 0
+WaKa#6616: 1
+Ene SS Rawa#0855: 0
+remainder: 0
+
+
+Reacter: [0 0 0 0 0 0 0 3 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+danielo#2815: 2
+katerinabc#6667: 1
+WaKa#6616: 0
+Ene SS Rawa#0855: 0
+remainder: 0
+
+
+Reacted: [0 0 0 0 0 0 0 3 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
 danielo#2815: 0
 katerinabc#6667: 0
 WaKa#6616: 0
 Ene SS Rawa#0855: 3
 remainder: 0
 
- 
 
 Date: ['2022-07-02']   Channel: ['community-health']
 Lone messages: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 1 0 0 0 0 0 0]
@@ -81,7 +96,7 @@ Ene SS Rawa#0855: 0
 remainder: 0
 
 
-Replies: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+Replier: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
 danielo#2815: 0
 katerinabc#6667: 0
 WaKa#6616: 0
@@ -89,7 +104,7 @@ Ene SS Rawa#0855: 0
 remainder: 0
 
 
-Thread replies: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+Replied: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
 danielo#2815: 0
 katerinabc#6667: 0
 WaKa#6616: 0
@@ -97,7 +112,7 @@ Ene SS Rawa#0855: 0
 remainder: 0
 
 
-Mentions: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0]
+Mentioner: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0]
 danielo#2815: 1
 katerinabc#6667: 0
 WaKa#6616: 0
@@ -105,7 +120,15 @@ Ene SS Rawa#0855: 0
 remainder: 0
 
 
-Thread mentions: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+Mentioned: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0]
+danielo#2815: 0
+katerinabc#6667: 0
+WaKa#6616: 1
+Ene SS Rawa#0855: 0
+remainder: 0
+
+
+Reply mentioner: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
 danielo#2815: 0
 katerinabc#6667: 0
 WaKa#6616: 0
@@ -113,7 +136,7 @@ Ene SS Rawa#0855: 0
 remainder: 0
 
 
-Reply mentions: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+Reply mentioned: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
 danielo#2815: 0
 katerinabc#6667: 0
 WaKa#6616: 0
@@ -121,14 +144,21 @@ Ene SS Rawa#0855: 0
 remainder: 0
 
 
-Emojis: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0]
+Reacter: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0]
+danielo#2815: 1
+katerinabc#6667: 0
+WaKa#6616: 0
+Ene SS Rawa#0855: 0
+remainder: 0
+
+
+Reacted: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0]
 danielo#2815: 0
 katerinabc#6667: 1
 WaKa#6616: 0
 Ene SS Rawa#0855: 0
 remainder: 0
 
- 
 
 Date: ['2022-07-03']   Channel: ['community-health']
 Lone messages: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
@@ -147,15 +177,39 @@ Ene SS Rawa#0855: 0
 remainder: 0
 
 
-Replies: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+Replier: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0]
+danielo#2815: 1
+katerinabc#6667: 0
+WaKa#6616: 0
+Ene SS Rawa#0855: 0
+remainder: 0
+
+
+Replied: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0]
 danielo#2815: 0
 katerinabc#6667: 0
+WaKa#6616: 1
+Ene SS Rawa#0855: 0
+remainder: 0
+
+
+Mentioner: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 0 0 0]
+danielo#2815: 2
+katerinabc#6667: 0
 WaKa#6616: 0
 Ene SS Rawa#0855: 0
 remainder: 0
 
 
-Thread replies: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0]
+Mentioned: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 0 0 0]
+danielo#2815: 0
+katerinabc#6667: 1
+WaKa#6616: 0
+Ene SS Rawa#0855: 0
+remainder: 1
+
+
+Reply mentioner: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0]
 danielo#2815: 1
 katerinabc#6667: 0
 WaKa#6616: 0
@@ -163,46 +217,37 @@ Ene SS Rawa#0855: 0
 remainder: 0
 
 
-Mentions: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+Reply mentioned: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0]
 danielo#2815: 0
 katerinabc#6667: 0
-WaKa#6616: 0
+WaKa#6616: 1
 Ene SS Rawa#0855: 0
 remainder: 0
 
 
-Thread mentions: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0]
+Reacter: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 0 0 0]
 danielo#2815: 1
-katerinabc#6667: 0
+katerinabc#6667: 1
 WaKa#6616: 0
 Ene SS Rawa#0855: 0
 remainder: 0
 
 
-Reply mentions: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0]
-danielo#2815: 1
-katerinabc#6667: 0
-WaKa#6616: 0
-Ene SS Rawa#0855: 0
-remainder: 0
-
-
-Emojis: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 0 0 0]
+Reacted: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 0 0 0]
 danielo#2815: 1
 katerinabc#6667: 0
 WaKa#6616: 1
 Ene SS Rawa#0855: 0
 remainder: 0
 
- 
 
 Date: ['2022-07-02']   Channel: ['general']
 Lone messages: [0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
-danielo#2815: 1
+danielo#2815: 0
 katerinabc#6667: 0
 WaKa#6616: 0
 Ene SS Rawa#0855: 0
-remainder: 0
+remainder: 1
 
 
 Thread messages: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
@@ -213,23 +258,23 @@ Ene SS Rawa#0855: 0
 remainder: 0
 
 
-Replies: [0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
-danielo#2815: 0
+Replier: [0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+danielo#2815: 1
 katerinabc#6667: 0
 WaKa#6616: 0
 Ene SS Rawa#0855: 0
 remainder: 1
 
 
-Thread replies: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
-danielo#2815: 0
+Replied: [0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+danielo#2815: 1
 katerinabc#6667: 0
 WaKa#6616: 0
 Ene SS Rawa#0855: 0
-remainder: 0
+remainder: 1
 
 
-Mentions: [0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+Mentioner: [0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
 danielo#2815: 1
 katerinabc#6667: 0
 WaKa#6616: 0
@@ -237,38 +282,53 @@ Ene SS Rawa#0855: 0
 remainder: 0
 
 
-Thread mentions: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+Mentioned: [0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
 danielo#2815: 0
-katerinabc#6667: 0
-WaKa#6616: 0
-Ene SS Rawa#0855: 0
-remainder: 0
-
-
-Reply mentions: [0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
-danielo#2815: 0
-katerinabc#6667: 0
-WaKa#6616: 0
-Ene SS Rawa#0855: 0
-remainder: 1
-
-
-Emojis: [0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
-danielo#2815: 0
-katerinabc#6667: 0
-WaKa#6616: 0
-Ene SS Rawa#0855: 0
-remainder: 1
-
- 
-
-All channel-date combinations together
-Lone messages: [0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 1 0 1 0 0 0 0 0 0]
-danielo#2815: 2
 katerinabc#6667: 1
 WaKa#6616: 0
 Ene SS Rawa#0855: 0
 remainder: 0
+
+
+Reply mentioner: [0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+danielo#2815: 1
+katerinabc#6667: 0
+WaKa#6616: 0
+Ene SS Rawa#0855: 0
+remainder: 1
+
+
+Reply mentioned: [0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+danielo#2815: 1
+katerinabc#6667: 0
+WaKa#6616: 0
+Ene SS Rawa#0855: 0
+remainder: 1
+
+
+Reacter: [0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+danielo#2815: 1
+katerinabc#6667: 0
+WaKa#6616: 0
+Ene SS Rawa#0855: 0
+remainder: 1
+
+
+Reacted: [0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+danielo#2815: 1
+katerinabc#6667: 0
+WaKa#6616: 0
+Ene SS Rawa#0855: 0
+remainder: 1
+
+
+All channel-date combinations together
+Lone messages: [0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 1 0 1 0 0 0 0 0 0]
+danielo#2815: 1
+katerinabc#6667: 1
+WaKa#6616: 0
+Ene SS Rawa#0855: 0
+remainder: 1
 
 
 Thread messages: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0]
@@ -279,55 +339,71 @@ Ene SS Rawa#0855: 0
 remainder: 0
 
 
-Replies: [0 0 0 0 0 0 0 1 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
-danielo#2815: 0
+Replier: [0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0 0 0 0 0 1 0 0 0]
+danielo#2815: 2
 katerinabc#6667: 0
 WaKa#6616: 0
 Ene SS Rawa#0855: 1
 remainder: 1
 
 
-Thread replies: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0]
+Replied: [0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0 0 0 0 0 1 0 0 0]
 danielo#2815: 1
 katerinabc#6667: 0
-WaKa#6616: 0
+WaKa#6616: 2
 Ene SS Rawa#0855: 0
-remainder: 0
+remainder: 1
 
 
-Mentions: [0 0 0 0 0 0 0 2 1 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0]
-danielo#2815: 2
+Mentioner: [0 0 0 0 0 0 0 2 1 0 0 0 0 0 0 0 0 1 0 0 2 0 0 0]
+danielo#2815: 4
 katerinabc#6667: 0
 WaKa#6616: 0
 Ene SS Rawa#0855: 2
 remainder: 0
 
 
-Thread mentions: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0]
+Mentioned: [0 0 0 0 0 0 0 2 1 0 0 0 0 0 0 0 0 1 0 0 2 0 0 0]
 danielo#2815: 1
-katerinabc#6667: 0
-WaKa#6616: 0
+katerinabc#6667: 3
+WaKa#6616: 1
 Ene SS Rawa#0855: 0
-remainder: 0
+remainder: 1
 
 
-Reply mentions: [0 0 0 0 0 0 0 1 0 1 0 0 0 0 0 0 0 0 0 0 1 0 0 0]
-danielo#2815: 1
+Reply mentioner: [0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0 0 0 0 0 1 0 0 0]
+danielo#2815: 2
 katerinabc#6667: 0
 WaKa#6616: 0
 Ene SS Rawa#0855: 1
 remainder: 1
 
 
-Emojis: [0 0 0 0 0 0 0 3 0 1 0 0 0 0 0 1 0 0 0 0 2 0 0 0]
+Reply mentioned: [0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0 0 0 0 0 1 0 0 0]
 danielo#2815: 1
+katerinabc#6667: 0
+WaKa#6616: 2
+Ene SS Rawa#0855: 0
+remainder: 1
+
+
+Reacter: [0 0 0 0 0 0 0 3 1 1 0 0 0 0 0 1 0 0 0 0 2 0 0 0]
+danielo#2815: 5
+katerinabc#6667: 2
+WaKa#6616: 0
+Ene SS Rawa#0855: 0
+remainder: 1
+
+
+Reacted: [0 0 0 0 0 0 0 3 1 1 0 0 0 0 0 1 0 0 0 0 2 0 0 0]
+danielo#2815: 2
 katerinabc#6667: 1
 WaKa#6616: 1
 Ene SS Rawa#0855: 3
 remainder: 1
 
 
-Error count: [1, 0, 1, 1]
+Error count: [2, 0, 1, 1, 1, 2, 1]
 
 
 Test 1: passed
@@ -352,6 +428,13 @@ Test 19: passed
 Test 20: passed
 Test 21: passed
 Test 22: passed
+Test 23: passed
+Test 24: passed
+Test 25: passed
+Test 26: passed
+Test 27: passed
+Test 28: passed
+Test 29: passed
 
 
 All passed: True
