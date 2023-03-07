@@ -15,10 +15,17 @@ class GuildsRnDaoModel(BaseModel):
             database=database)
         # print(self.database[self.collection_name].find_one())
 
-    def get_connected_guilds(self):
+    def get_connected_guilds(self, guildId):
         """
-        Returns the list of the connected guilds
+        Returns the list of the connected guilds if guildId is None
+        Otherwise the list of one connected guild with given guildId
         """
+        findOption = {
+            "isDisconnected": False
+        }
+        if guildId is not None:
+            findOption["guildId"] = guildId
         guilds = self.database[self.collection_name].find(
-            {"isDisconnected": False}, {"guildId": 1})
+            findOption, {"guildId": 1})
+
         return [x["guildId"] for x in guilds]
