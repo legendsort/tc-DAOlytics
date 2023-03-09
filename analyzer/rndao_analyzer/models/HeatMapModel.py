@@ -43,6 +43,24 @@ class HeatMapModel(BaseModel):
                             "bsonType": "int"
                         }
                     },
+                   "replier_accounts": {
+                        "bsonType": "array",
+                        "items": {
+                            "bsonType": "object",
+                            "required": ["_id", "account", "count"],
+                            "properties": {
+                                "_id": {
+                                    "bsonType": "string"
+                                },
+                                "account": {
+                                    "bsonType": "string"
+                                },
+                                "count": {
+                                    "bsonType": "int"
+                                }
+                            }
+                        }
+                    },
                     "replied": {
                         "bsonType": "array",
                         "items": {
@@ -53,6 +71,24 @@ class HeatMapModel(BaseModel):
                         "bsonType": "array",
                         "items": {
                             "bsonType": "int"
+                        }
+                    },
+                    "mentioner_accounts": {
+                        "bsonType": "array",
+                        "items": {
+                            "bsonType": "object",
+                            "required": ["_id", "account", "count"],
+                            "properties": {
+                                "_id": {
+                                    "bsonType": "string"
+                                },
+                                "account": {
+                                    "bsonType": "string"
+                                },
+                                "count": {
+                                    "bsonType": "int"
+                                }
+                            }
                         }
                     },
                     "mentioned": {
@@ -71,6 +107,24 @@ class HeatMapModel(BaseModel):
                         "bsonType": "array",
                         "items": {
                             "bsonType": "int"
+                        }
+                    },
+                    "reacter_accounts": {
+                        "bsonType": "array",
+                        "items": {
+                            "bsonType": "object",
+                            "required": ["_id", "account", "count"],
+                            "properties": {
+                                "_id": {
+                                    "bsonType": "string"
+                                },
+                                "account": {
+                                    "bsonType": "string"
+                                },
+                                "count": {
+                                    "bsonType": "int"
+                                }
+                            }
                         }
                     },
                     "reacted": {
