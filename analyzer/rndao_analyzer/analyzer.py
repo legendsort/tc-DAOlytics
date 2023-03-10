@@ -192,9 +192,9 @@ class RnDaoAnalyzer:
                     heatmap_dict["mentioned"] = heatmap["mentioned"][i]
                     heatmap_dict["reacter"] = heatmap["reacter"][i]
                     heatmap_dict["reacted"] = heatmap["reacted"][i]
-                    heatmap_dict["reacted_per_acc"] = store_counts_obj(dict(Counter(heatmap["reacted_per_acc"][i])))
-                    heatmap_dict["mentioner_per_acc"] = store_counts_obj(dict(Counter(heatmap["mentioner_per_acc"][i])))
-                    heatmap_dict["replied_per_acc"] = store_counts_obj(dict(Counter(heatmap["replied_per_acc"][i])))
+                    heatmap_dict["reacted_per_acc"] = store_counts_dict(dict(Counter(heatmap["reacted_per_acc"][i])))
+                    heatmap_dict["mentioner_per_acc"] = store_counts_dict(dict(Counter(heatmap["mentioner_per_acc"][i])))
+                    heatmap_dict["replied_per_acc"] = store_counts_dict(dict(Counter(heatmap["replied_per_acc"][i])))
                     heatmap_dict["account_name"] = heatmap["acc_names"][i]
                     sum_ac = self.getNumberOfActions(heatmap_dict)
 
@@ -219,6 +219,9 @@ class AccountCounts:
         self.account = account  # account name
         self.counts = counts    # number of interactions
 
+    # convert as dict
+    def asdict(self):
+        return {'account': self.account, 'count': self.counts},
 
 def getGuildFromCmd():
     args = sys.argv
@@ -237,6 +240,19 @@ def store_counts_obj(counts_dict):
 
         # make object and store in array
         obj_array.append(AccountCounts(acc, counts_dict[acc]))
+
+    return obj_array
+
+def store_counts_dict(counts_dict):
+
+    # make empty result array
+    obj_array = []
+
+    # for each account
+    for acc in counts_dict.keys():
+
+        # make dict and store in array
+        obj_array.append(AccountCounts(acc, counts_dict[acc]).asdict())
 
     return obj_array
 
