@@ -1,4 +1,4 @@
-from numpy import zeros
+from numpy import zeros, squeeze
 
 
 class Query():
@@ -176,15 +176,24 @@ def per_account_interactions(cursor_list,
         for db_records in cursor_list:
             ## for each interactor type in record
             for db_interactor in db_records[feature]:
-
-                acc_name = db_interactor['account']
+                
+                ## because of DB inconsistency
+                ## there was a list of one item always in one of the servers
+                ## so we're getting the first or the one item available of it
+                if type(db_interactor) is list:
+                    db_interactor_ = db_interactor[0]
+                ## else, if the inconsistency wasn't available
+                else:
+                    db_interactor_ = db_interactor
+                
+                acc_name = db_interactor_['account']
                 ## if the account wasn't available in saved dictionary
                 ## then simply set the counts to the saved dictionary 
                 if acc_name not in per_acc_interactions[feature].keys():
-                    per_acc_interactions[feature][acc_name] = db_interactor['count']
+                    per_acc_interactions[feature][acc_name] = db_interactor_['count']
                 ## else, sum the count to it
                 else:
-                    per_acc_interactions[feature][acc_name] += db_interactor['count']
+                    per_acc_interactions[feature][acc_name] += db_interactor_['count']
 
     ## remaking the dictionaries into the format of database
 

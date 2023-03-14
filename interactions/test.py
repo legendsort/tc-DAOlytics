@@ -32,7 +32,10 @@ def test_sum_interactions_features(db_access, table, query_dict) -> None:
     
     print(interactions)
 
-def test_per_account_interactions(db_access, table, query_dict):
+def test_per_account_interactions(db_access, 
+                                  table, 
+                                  query_dict, 
+                                  dict_keys_list=['replier_accounts', 'reacter_accounts' , 'mentioner_accounts']):
     """
     test per account interactions (interactions are `mentioner_accounts`, `reacter_accounts`, and `replier_accounts`)
     """
@@ -54,7 +57,8 @@ def test_per_account_interactions(db_access, table, query_dict):
                                     query=query_dict,
                                     ignore_features= ignore_features)
     cursor_list = list(cursor)
-    results = per_account_interactions(cursor_list=cursor_list)
+    
+    results = per_account_interactions(cursor_list=cursor_list, dict_keys=dict_keys_list)
 
     print(results)
 
@@ -65,9 +69,13 @@ def test_per_account_interactions(db_access, table, query_dict):
 
 if __name__=='__main__':
 
-    channels = ['123123123123']
-    dates = ['2022-02-01']
-    acc_names = ['MagicPalm']
+    # channels = ['123123123123']
+    # dates = ['2022-02-01']
+    # acc_names = ['MagicPalm']
+
+    channels = ['993163081939165240']
+    dates = ['2022-07-10']
+    acc_names = ["thegadget.eth#3374"]
 
     ## database access
     db_access = DB_access(DB_NAME, CONNECTION_STRING)
@@ -77,7 +85,11 @@ if __name__=='__main__':
     query_dict = query.create_query_filter_account_channel_dates(
         acc_names=acc_names, 
         channels= channels,
-        dates=dates)
+        dates=dates,
+        date_key='date',
+        channel_key='channelId',
+        account_key='account_name'
+        )
     
 
     ########## uncomment this below to test the summing the interactions in 24 hour
@@ -85,7 +97,11 @@ if __name__=='__main__':
 
 
     ########## uncomment this below to test the per account interactions (`mentioner_accounts`, `reacter_accounts`, `replier_accounts`)
-    test_per_account_interactions(db_access, TABLE, query_dict)
+    test_per_account_interactions(db_access, 
+                                  TABLE, 
+                                  query_dict, 
+                                  dict_keys_list=['replied_per_acc', 'reacted_per_acc' , 'mentioner_per_acc']
+                                  )
 
 
 
