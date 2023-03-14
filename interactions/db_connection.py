@@ -23,8 +23,46 @@ class DB_access:
       """
       client = MongoClient(connection_string)
       return client[db_name]
+
+   def _db_call(self, calling_function, query, feature_projection=None, sorting=None):
+      """
+      call the function on database, it could be whether aggragation or find
+
+      Parameters:
+      -------------
+      calling_function : function
+         can be `MongoClient.find` or `MongoClient.aggregate`
+      query : dictionary
+         the query as a dictionary
+      feature_projection : dictionary
+         the dictionary to or not to project the results on it
+         default is None, meaning to return all features
+      sorting : tuple
+         sort the results base on the input dictionary
+         if None, then do not sort the results
+
+      Returns:
+      ----------
+      cursor : mongodb Cursor
+         cursor to get the information of a query 
+      """
+      ## if there was no projection available
+      if feature_projection is None:
+         ## if sorting was given
+         if sorting is not None:
+            cursor = calling_function(query).sort(sorting[0], sorting[1])
+         else: 
+            cursor = calling_function.find(query)
+      else:
+         if sorting is not None:
+            cursor = calling_function(query, feature_projection).sort(sorting[0], sorting[1])
+         else:
+            cursor = calling_function(query, feature_projection)
+
+      return cursor
+
    
-   def query_db_aggregation(self, query, table, feature_projection=None):
+   def query_db_aggregation(self, query, table, feature_projection=None, sorting=None):
       """
       aggregate the database using query
 
@@ -43,14 +81,15 @@ class DB_access:
       cursor : mongodb Cursor
          cursor to get the information of a query 
       """
-      if feature_projection is None:
-         cursor = self.db_client[table].aggregate(query)
-      else:
-         cursor = self.db_client[table].aggregate(query, feature_projection)
+
+      cursor = self._db_call(calling_function=self.db_client[table].aggregate,
+                             query=query,
+                             feature_projection=feature_projection,
+                             sorting=sorting)
 
       return cursor
   
-   def query_db_find(self, table, query, feature_projection=None):
+   def query_db_find(self, table, query, feature_projection=None, sorting=None):
       """
       aggregate the database using query
 
@@ -69,10 +108,9 @@ class DB_access:
       cursor : mongodb Cursor
          cursor to get the information of a query 
       """
-      if feature_projection is None:
-         cursor = self.db_client[table].find(query)
-      else:
-         cursor = self.db_client[table].find(query, feature_projection)
-
+      cursor = self._db_call(calling_function=self.db_client[table].find, 
+                             query=query,
+                             feature_projection=feature_projection,
+                             sorting=sorting)
       return cursor
    
