@@ -52,7 +52,7 @@ class DB_access:
          if sorting is not None:
             cursor = calling_function(query).sort(sorting[0], sorting[1])
          else: 
-            cursor = calling_function.find(query)
+            cursor = calling_function(query)
       else:
          if sorting is not None:
             cursor = calling_function(query, feature_projection).sort(sorting[0], sorting[1])
