@@ -24,7 +24,7 @@ class DB_access:
       client = MongoClient(connection_string)
       return client[db_name]
    
-   def query_db_aggregation(self, query, table, ignore_features=None):
+   def query_db_aggregation(self, query, table, feature_projection=None):
       """
       aggregate the database using query
 
@@ -34,8 +34,8 @@ class DB_access:
          the table name to retrieve the data
       query : dictionary
          the query as a dictionary
-      ignore_features : dictionary
-         the dictionary to not to project the results on it
+      feature_projection : dictionary
+         the dictionary to or not to project the results on it
          default is None, meaning to return all features
 
       Returns:
@@ -43,14 +43,14 @@ class DB_access:
       cursor : mongodb Cursor
          cursor to get the information of a query 
       """
-      if ignore_features is None:
+      if feature_projection is None:
          cursor = self.db_client[table].aggregate(query)
       else:
-         cursor = self.db_client[table].find(query)
+         cursor = self.db_client[table].aggregate(query, feature_projection)
 
       return cursor
   
-   def query_db_find(self, table, query, ignore_features=None):
+   def query_db_find(self, table, query, feature_projection=None):
       """
       aggregate the database using query
 
@@ -60,8 +60,8 @@ class DB_access:
          the table name to retrieve the data
       query : dictionary
          the query as a dictionary
-      ignore_features : dictionary
-         the dictionary to not to project the results on it
+      feature_projection : dictionary
+         the dictionary to or not to project the results on it
          default is None, meaning to return all features
 
       Returns:
@@ -69,10 +69,10 @@ class DB_access:
       cursor : mongodb Cursor
          cursor to get the information of a query 
       """
-      if ignore_features is None:
+      if feature_projection is None:
          cursor = self.db_client[table].find(query)
       else:
-         cursor = self.db_client[table].find(query, ignore_features)
+         cursor = self.db_client[table].find(query, feature_projection)
 
       return cursor
    

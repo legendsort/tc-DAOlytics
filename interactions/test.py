@@ -11,20 +11,23 @@ from credentials import (
 
 
 def test_sum_interactions_features(db_access, table, query_dict) -> None:
-    ## the features not to be returned 
-    ignore_features = {
-        'date': 0,
-        'account': 0, 
-        'channelId': 0,
-        'replier_accounts': 0,
-        'mentioner_accounts': 0,
-        'reacter_accounts': 0,
+    ## the features to be or not to be returned 
+    feature_projection = {
+        'thr_messages': 1,
+        'lone_messages': 1,
+        'replier': 1,
+        'replied': 1,
+        'mentioner': 1,
+        'mentioned': 1,
+        'reacter': 1,
+        'reacted': 1,
         '_id': 0
     }
 
     cursor = db_access.query_db_find(table= table,
                                      query=query_dict,
-                                     ignore_features=ignore_features)
+                                     feature_projection=feature_projection,
+                                     )
     cursor_list = list(cursor)
 
     interactions = sum_interactions_features(cursor_list=cursor_list, 
@@ -40,7 +43,7 @@ def test_per_account_interactions(db_access,
     test per account interactions (interactions are `mentioner_accounts`, `reacter_accounts`, and `replier_accounts`)
     """
 
-    ignore_features = {
+    feature_projection = {
         'thr_messages': 0,
         'lone_messages': 0,
         'replier':0,
@@ -55,7 +58,7 @@ def test_per_account_interactions(db_access,
 
     cursor = db_access.query_db_find(table= table,
                                     query=query_dict,
-                                    ignore_features= ignore_features)
+                                    feature_projection = feature_projection)
     cursor_list = list(cursor)
     
     results = per_account_interactions(cursor_list=cursor_list, dict_keys=dict_keys_list)
