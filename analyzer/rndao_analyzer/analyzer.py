@@ -134,6 +134,9 @@ class RnDaoAnalyzer:
             # If no heatmap was created, than tha last date is the first
             # rawdata entry
             last_date = rawinfo_c.get_first_date()
+            if last_date == None:
+                raise Exception(
+                    f"Collection '{rawinfo_c.collection_name}' does not exist")
             last_date.replace(tzinfo=timezone.utc)
         else:
             last_date = last_date + timedelta(days=1)
@@ -192,9 +195,12 @@ class RnDaoAnalyzer:
                     heatmap_dict["mentioned"] = heatmap["mentioned"][i]
                     heatmap_dict["reacter"] = heatmap["reacter"][i]
                     heatmap_dict["reacted"] = heatmap["reacted"][i]
-                    heatmap_dict["reacted_per_acc"] = store_counts_dict(dict(Counter(heatmap["reacted_per_acc"][i])))
-                    heatmap_dict["mentioner_per_acc"] = store_counts_dict(dict(Counter(heatmap["mentioner_per_acc"][i])))
-                    heatmap_dict["replied_per_acc"] = store_counts_dict(dict(Counter(heatmap["replied_per_acc"][i])))
+                    heatmap_dict["reacted_per_acc"] = store_counts_dict(
+                        dict(Counter(heatmap["reacted_per_acc"][i])))
+                    heatmap_dict["mentioner_per_acc"] = store_counts_dict(
+                        dict(Counter(heatmap["mentioner_per_acc"][i])))
+                    heatmap_dict["replied_per_acc"] = store_counts_dict(
+                        dict(Counter(heatmap["replied_per_acc"][i])))
                     heatmap_dict["account_name"] = heatmap["acc_names"][i]
                     sum_ac = self.getNumberOfActions(heatmap_dict)
 
@@ -223,12 +229,14 @@ class AccountCounts:
     def asdict(self):
         return {'account': self.account, 'count': self.counts},
 
+
 def getGuildFromCmd():
     args = sys.argv
     guildId = None
     if len(args) == 2:
         guildId = args[1]
     return guildId
+
 
 def store_counts_obj(counts_dict):
 
@@ -242,6 +250,7 @@ def store_counts_obj(counts_dict):
         obj_array.append(AccountCounts(acc, counts_dict[acc]))
 
     return obj_array
+
 
 def store_counts_dict(counts_dict):
 

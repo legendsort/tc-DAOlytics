@@ -68,18 +68,15 @@ class RawInfoModel(BaseModel):
         For determining the analysis date ranges
         This is RawInfo specific method
         """
-        all_entries = self.database[self.collection_name].find(
-        )  # .sort([("created_at", pymongo.ASCENDING)]).limit(1)[0]["created_at"]
-        valid_entries = [x for x in all_entries if "datetime" in x.keys()]
-
-        if len(valid_entries) == 0:
-            raise Exception("RawInfo collection has no entries with 'datetime' value")
-        sorted_entries = sorted(valid_entries, key=lambda t: int(t["datetime"].replace("-","").replace(":","").replace(" ","")))
-        date_str = sorted_entries[0]["datetime"]
-        date_obj = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
-
-        return date_obj
-
+        if self.database[self.collection_name].count_documents({}) > 0:
+            first_date = self.database[self.collection_name].find().sort([("datetime", pymongo.ASCENDING)]).limit(1)[0]["datetime"]
+            date_obj = datetime.strptime(first_date, "%Y-%m-%d %H:%M:%S")
+            return date_obj
+            # do something with the first document
+        else:
+            # handle the case where no documents are returned by the query
+            print("No documents found in the collection")
+            return None
 
     def get_day_entries(self, day):
         """
