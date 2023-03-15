@@ -331,7 +331,7 @@ def filter_channel_name_id(cursor_list,
     return channels_id_dict
 
 def filter_channel_thread(cursor_list, 
-                            channels_name_id_dict,
+                            channels_id,
                             thread_id_key = 'threadId',
                             author_key = 'author',
                             message_content_key = 'content'):
@@ -342,8 +342,9 @@ def filter_channel_thread(cursor_list,
     ------------
     cursor_list : list of dictionaries
         the list of values in DB containing a thread and messages of authors
-    channels_name_id_dict : dictionary
-        a dictionary with keys as channel_id and values as channel_name
+    channels_id : list
+        a list of channels id
+        minimum length of the list is 1
     thread_id_key : string
         the name of the thread id field in DB
     author_key : string
@@ -377,22 +378,21 @@ def filter_channel_thread(cursor_list,
     ######### First we're filtering the records via their channel name #########
     channels_dict = {}
     ## create an empty array of each channel
-    for ch_name in channels_name_id_dict.values():
-        channels_dict[ch_name] = []
+    for ch_id in channels_id:
+        channels_dict[ch_id] = []
 
     ## filtering through the channel name field in dictionary
     for record in cursor_list:
         chId = record['channelId']
-        ch_name = channels_name_id_dict[chId]
-        channels_dict[ch_name].append(record)
+        channels_dict[chId].append(record)
 
     ######### and the adding the filtering of thread id #########
     channel_thread_dict = {}
 
     ## filtering threads 
-    for ch_name in channels_dict.keys():
-        channel_thread_dict[ch_name] = {}
-        for record in channels_dict[ch_name]:
+    for chId in channels_dict.keys():
+        channel_thread_dict[chId] = {}
+        for record in channels_dict[chId]:
             ## get the record id
             rec_id = record[thread_id_key]
             ## we could instead of threadId use thread names
@@ -400,12 +400,12 @@ def filter_channel_thread(cursor_list,
 
             ## if the thread wasn't available in dict
             ## then make a list with the value
-            if rec_id not in channel_thread_dict[ch_name].keys():
+            if rec_id not in channel_thread_dict[chId].keys():
                 ## creating the first message
-                channel_thread_dict[ch_name][rec_id] = [ {record[author_key]: record[message_content_key]} ]
+                channel_thread_dict[chId][rec_id] = [ {record[author_key]: record[message_content_key]} ]
             ## if the thread was created before
             ## then append the author content data to it
             else:
-                channel_thread_dict[ch_name][rec_id].append( {record[author_key]: record[ message_content_key ]} )
+                channel_thread_dict[chId][rec_id].append( {record[author_key]: record[ message_content_key ]} )
     
     return channel_thread_dict

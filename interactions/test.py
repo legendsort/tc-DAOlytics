@@ -94,11 +94,11 @@ def test_per_account_interactions(db_access,
     print(results)
 
 def test_query_threads(db_access, 
-                       table_channel,
+                    #    table_channel,
                        table_messages, 
-                       channel_names,
+                       channels_id,
                        dates, 
-                       channelsName_key = 'channel',
+                    #    channelsName_key = 'channel',
                        channelsId_key='channelId', 
                        date_key='date',
                        threadid_key = 'threadId',
@@ -107,30 +107,30 @@ def test_query_threads(db_access,
     query = Query()
 
     ########## first querying to get the channels id from channels name ##########
-    channels_projection = {
-        'channelId': 1,
-        'channel': 1
-    } 
+    # channels_projection = {
+    #     'channelId': 1,
+    #     'channel': 1
+    # } 
 
-    query_channels_dict = query.create_query_channel(channel_names)
-    cursor_channels = db_access.query_db_find(table= table_channel,
-                                    query=query_channels_dict,
-                                    feature_projection = channels_projection)
+    # query_channels_dict = query.create_query_channel(channel_names)
+    # cursor_channels = db_access.query_db_find(table= table_channel,
+    #                                 query=query_channels_dict,
+    #                                 feature_projection = channels_projection)
     
-    cursor_channels_list = list(cursor_channels)
+    # cursor_channels_list = list(cursor_channels)
     
-    if cursor_channels_list == []:
-        raise ValueError("No channels available! please first check if the channels you want are available.")
+    # if cursor_channels_list == []:
+    #     raise ValueError("No channels available! please first check if the channels you want are available.")
 
     ## filtering the query to make a dictionary of keys as channel id and values as channel names
-    channels_id_dict = filter_channel_name_id(cursor_channels_list, 
-                           channelsName_key, 
-                           channelsId_key)
+    # channels_id_dict = filter_channel_name_id(cursor_channels_list, 
+    #                        channelsName_key, 
+    #                        channelsId_key)
 
     
     ########## And now querying the table with messages in it ##########
     query_dict = query.create_query_threads(
-        channels_id=list(channels_id_dict.keys()), 
+        channels_id=channels_id, 
         dates=dates,
         channelsId_key=channelsId_key,
         date_key=date_key
@@ -157,7 +157,7 @@ def test_query_threads(db_access,
 
     ## getting a result as `channel_thread_dict : {str:{str:{str:str}}}`
     thread_results = filter_channel_thread(cursor_list=cursor_list,
-                          channels_name_id_dict=channels_id_dict, 
+                          channels_id=channels_id, 
                           thread_id_key=threadid_key,
                           author_key=author_key,
                           message_content_key=message_content_key)
@@ -179,9 +179,10 @@ if __name__=='__main__':
     # dates = ['2022-02-01']
     # acc_names = ['MagicPalm']
 
-    channels = ['993163081939165240']
+    channels = ['993163081939165240', '993163081939165237']
     ## channels_name is used for the test_query_threads 
-    channels_name = ['general', 'announcements']
+    # channels_name = ['general', 'announcements']
+    
     dates = ['2022-07-10', '2022-08-08', '2022-08-16']
     
     acc_names = ["thegadget.eth#3374"]
@@ -211,9 +212,9 @@ if __name__=='__main__':
 
     ########## uncomment this below to test the per thread messages
     test_query_threads(db_access=db_access,
-                       table_channel='channels',
+                    #    table_channel='channels',
                        table_messages='rawinfos',
-                       channel_names=channels_name, 
+                       channels_id=channels, 
                        dates=dates, 
                        date_key='datetime',
                        )
