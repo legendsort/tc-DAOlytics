@@ -114,6 +114,69 @@ class Query():
 
         return query
 
+    def create_query_channel(self, channels_name):
+        """
+        create a dictionary of query to get channel_id using channel_name
+
+        Parameters:
+        -------------
+        channel_name : list
+            a list of channel names to retrive their id
+        
+        Returns:
+        ---------
+        query : dictionary
+            the query to retrieve the channel ids
+        """
+        query_channelId = { 'channel': { '$in': channels_name } }
+
+        return query_channelId
+    
+    def create_query_threads(self, channels_id, dates, channelsId_key='channelId', date_key='date') -> dict:
+        """
+        create a dictionary of query to query the DB, getting the messages for specific channels and dates
+
+        Parameters:
+        ------------
+        channels_id : list
+            list of strings, each string is a channel identifier for the channels that needs to be included. 
+            The minimum length of this list is 1
+        dates : list
+            list of datetime objects, each datetime object is a date that needs to be included. 
+            The minimum length of this list is 1
+        channelsId_key : string
+            the field name corresponding to chnnel id in database
+            default value is `channelId`
+        date_key : string
+            the field name corresponding to date in database
+            default value is `date`
+
+        
+        Returns:
+        ---------
+        query : dictionary
+            a dictionary that query the database 
+        """
+        #### Array inputs checking ####
+        if len(channels_id) < 1:
+            raise ValueError(f"channels_id array is empty!")
+        if len(dates) < 1:
+            raise ValueError(f"dates array is empty!")
+        
+        datetime_query = []
+        for date in dates:
+            datetime_query.append({date_key: { '$regex': date}})
+
+        query = { 
+            '$and': [
+                {channelsId_key: { '$in': channels_id }},
+                {'$or': datetime_query},
+                ## do not return the messages with no thread
+                { 'thread': {'$ne': 'None'} }
+            ]
+        }
+
+        return query
 
 
 def sum_interactions_features(cursor_list, dict_keys):
@@ -235,3 +298,114 @@ def per_account_interactions(cursor_list,
     summed_per_account_interactions = per_acc_interactions_db_style
 
     return summed_per_account_interactions
+
+def filter_channel_name_id(cursor_list, 
+                            channel_name_key='channel',
+                            channel_id_key='channelId'):
+    """
+    filter the cursor list retrieved from DB for channels and their ids
+    
+    Parameters:
+    -------------
+    cursor_list : list of dictionaries
+        the retreived values of DB
+    channel_name_key : string
+        the name of channel_name field in DB
+        default is `channel`
+    channel_id_key : string
+        the name of channel_id field in DB
+        default is `channelId`
+
+    Returns:
+    ----------
+    channels_id_dict : dictionary
+        a dictionary with keys as channel_id and values as channel_name
+    """
+    channels_id_dict = {}
+    for ch_id_dict in cursor_list:
+        ## the keys in dict are channel id
+        chId = ch_id_dict[channel_id_key]
+        ## and the values of dict are the channel name
+        channels_id_dict[chId] = ch_id_dict[channel_name_key]
+
+    return channels_id_dict
+
+def filter_channel_thread(cursor_list, 
+                            channels_name_id_dict,
+                            thread_id_key = 'threadId',
+                            author_key = 'author',
+                            message_content_key = 'content'):
+    """
+    create a dictionary of channels and threads for messages, sorted by time descending
+
+    Parameters:
+    ------------
+    cursor_list : list of dictionaries
+        the list of values in DB containing a thread and messages of authors
+    channels_name_id_dict : dictionary
+        a dictionary with keys as channel_id and values as channel_name
+    thread_id_key : string
+        the name of the thread id field in DB
+    author_key : string
+        the name of the author field in DB
+    message_content_key : string
+        the name of the message content field in DB
+    
+    Returns:
+    ----------
+    channel_thread_dict : {str:{str:{str:str}}}
+        a dictionary having keys of channel names, and per thread messages as dictionary 
+
+    # An example of output can be like this:
+    {
+        “CHANNEL_ID1” : 
+        {
+            “THREAD_ID1” : 
+            {
+                “@user1”: “Example message 1”, 
+                “@user2”: “Example message 2”, 
+                …
+            }, 
+            “THREAD_ID2” : 
+                {More example messages in same format}, …}, 
+        “CHANNEL_ID2” : 
+            {More thread dictionaries with example messages in same format}, …}, 
+        More channel dictionaries with thread dictionaries with example messages in same format,
+            …
+    }
+    """
+    ######### First we're filtering the records via their channel name #########
+    channels_dict = {}
+    ## create an empty array of each channel
+    for ch_name in channels_name_id_dict.values():
+        channels_dict[ch_name] = []
+
+    ## filtering through the channel name field in dictionary
+    for record in cursor_list:
+        chId = record['channelId']
+        ch_name = channels_name_id_dict[chId]
+        channels_dict[ch_name].append(record)
+
+    ######### and the adding the filtering of thread id #########
+    channel_thread_dict = {}
+
+    ## filtering threads 
+    for ch_name in channels_dict.keys():
+        channel_thread_dict[ch_name] = {}
+        for record in channels_dict[ch_name]:
+            ## get the record id
+            rec_id = record[thread_id_key]
+            ## we could instead of threadId use thread names
+            ## for that the `thread` should be used here instead of `thread_id_key` in above code
+
+            ## if the thread wasn't available in dict
+            ## then make a list with the value
+            if rec_id not in channel_thread_dict[ch_name].keys():
+                ## creating the first message
+                channel_thread_dict[ch_name][rec_id] = [ {record[author_key]: record[message_content_key]} ]
+            ## if the thread was created before
+            ## then append the author content data to it
+            else:
+                channel_thread_dict[ch_name][rec_id].append( {record[author_key]: record[ message_content_key ]} )
+    
+    return channel_thread_dict

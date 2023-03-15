@@ -168,3 +168,4 @@ cython_debug/
 .org
 
 interactions/credentials.py
+interactions/temp.ipynb
