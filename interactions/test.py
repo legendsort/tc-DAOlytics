@@ -94,38 +94,15 @@ def test_per_account_interactions(db_access,
     print(results)
 
 def test_query_threads(db_access, 
-                    #    table_channel,
                        table_messages, 
                        channels_id,
                        dates, 
-                    #    channelsName_key = 'channel',
                        channelsId_key='channelId', 
                        date_key='date',
                        threadid_key = 'threadId',
                        author_key = 'author',
                        message_content_key = 'content') -> None:
     query = Query()
-
-    ########## first querying to get the channels id from channels name ##########
-    # channels_projection = {
-    #     'channelId': 1,
-    #     'channel': 1
-    # } 
-
-    # query_channels_dict = query.create_query_channel(channel_names)
-    # cursor_channels = db_access.query_db_find(table= table_channel,
-    #                                 query=query_channels_dict,
-    #                                 feature_projection = channels_projection)
-    
-    # cursor_channels_list = list(cursor_channels)
-    
-    # if cursor_channels_list == []:
-    #     raise ValueError("No channels available! please first check if the channels you want are available.")
-
-    ## filtering the query to make a dictionary of keys as channel id and values as channel names
-    # channels_id_dict = filter_channel_name_id(cursor_channels_list, 
-    #                        channelsName_key, 
-    #                        channelsId_key)
 
     
     ########## And now querying the table with messages in it ##########
@@ -150,7 +127,7 @@ def test_query_threads(db_access,
     cursor = db_access.query_db_find(table= table_messages,
                                     query=query_dict,
                                     feature_projection = projection,
-                                    sorting=('datetime', -1)
+                                    sorting=('datetime', 1)
                                     )
     
     cursor_list = list(cursor)    
@@ -180,8 +157,6 @@ if __name__=='__main__':
     # acc_names = ['MagicPalm']
 
     channels = ['993163081939165240', '993163081939165237']
-    ## channels_name is used for the test_query_threads 
-    # channels_name = ['general', 'announcements']
     
     dates = ['2022-07-10', '2022-08-08', '2022-08-16']
     
@@ -193,26 +168,28 @@ if __name__=='__main__':
     
 
     ########## uncomment this below to test the summing the interactions in 24 hour
-    # test_sum_interactions_features(db_access, 
-    #                                TABLE,
-    #                                channels,
-    #                                dates,
-    #                                acc_names)
+    print("-"*25 + "\n" + ' ' * 5  + "Summing interactions in 24 hour\n" + "-" * 25) 
+    test_sum_interactions_features(db_access, 
+                                   TABLE,
+                                   channels,
+                                   dates,
+                                   acc_names)
 
 
     ########## uncomment this below to test the per account interactions (`mentioner_accounts`, `reacter_accounts`, `replier_accounts`)
-    # test_per_account_interactions(db_access, 
-    #                               TABLE, 
-    #                               channels,
-    #                               dates,
-    #                               acc_names,
-    #                               dict_keys_list=['replied_per_acc', 'reacted_per_acc' , 'mentioner_per_acc']
-    #                               )
+    print("-"*25 + "\n" + ' ' * 5  + "Per Account Interactions\n" + "-" * 25) 
+    test_per_account_interactions(db_access, 
+                                  TABLE, 
+                                  channels,
+                                  dates,
+                                  acc_names,
+                                  dict_keys_list=['replied_per_acc', 'reacted_per_acc' , 'mentioner_per_acc']
+                                  )
 
 
     ########## uncomment this below to test the per thread messages
+    print("-"*25 + "\n" + ' ' * 5  + "Per Thread Messages\n" + "-" * 25) 
     test_query_threads(db_access=db_access,
-                    #    table_channel='channels',
                        table_messages='rawinfos',
                        channels_id=channels, 
                        dates=dates, 

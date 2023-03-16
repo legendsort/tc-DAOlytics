@@ -363,8 +363,8 @@ def filter_channel_thread(cursor_list,
         {
             “THREAD_ID1” : 
             {
-                “@user1”: “Example message 1”, 
-                “@user2”: “Example message 2”, 
+                “1:@user1”: “Example message 1”, 
+                “2:@user2”: “Example message 2”, 
                 …
             }, 
             “THREAD_ID2” : 
@@ -392,20 +392,27 @@ def filter_channel_thread(cursor_list,
     ## filtering threads 
     for chId in channels_dict.keys():
         channel_thread_dict[chId] = {}
+        ## initialize the index
+        idx = 1
         for record in channels_dict[chId]:
-            ## get the record id
-            rec_id = record[thread_id_key]
+            ## get the record id, its exactly the thread id
+            threadId = record[thread_id_key]
             ## we could instead of threadId use thread names
             ## for that the `thread` should be used here instead of `thread_id_key` in above code
 
             ## if the thread wasn't available in dict
-            ## then make a list with the value
-            if rec_id not in channel_thread_dict[chId].keys():
+            ## then make a dictionary for that
+            if threadId not in channel_thread_dict[chId].keys():
+                ## reset the idx for each thread
+                idx = 1
                 ## creating the first message
-                channel_thread_dict[chId][rec_id] = [ {record[author_key]: record[message_content_key]} ]
+                channel_thread_dict[chId][threadId] = { f'{idx}:{record[author_key]}': record[message_content_key]}
+
             ## if the thread was created before
-            ## then append the author content data to it
+            ## then add the author content data to the dictionary
             else:
-                channel_thread_dict[chId][rec_id].append( {record[author_key]: record[ message_content_key ]} )
-    
+                ## increase the index for the next messages in thread
+                idx += 1
+                channel_thread_dict[chId][threadId][f'{idx}:{record[author_key]}'] = record[ message_content_key ]
+
     return channel_thread_dict
