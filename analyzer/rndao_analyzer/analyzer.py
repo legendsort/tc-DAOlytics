@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 import logging
-import json
 import os
+import sys
 
 from pymongo.errors import ConnectionFailure
 from pymongo import MongoClient
 from datetime import datetime, timedelta, timezone
 from dateutil import tz
+from collections import Counter
 # Database models
 from models.UserModel import UserModel
 from models.GuildModel import GuildModel
@@ -60,6 +61,7 @@ class RnDaoAnalyzer:
         """ Connection String will be modified once the url is provided"""
 
         CONNECTION_STRING = f"mongodb://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}"
+
         self.db_client = MongoClient(CONNECTION_STRING,
                                      serverSelectionTimeoutMS=10000,
                                      connectTimeoutMS=200000)
@@ -73,10 +75,11 @@ class RnDaoAnalyzer:
             logging.error("Server not available")
             return
 
-    def run_once(self):
+    def run_once(self, guildId):
         """ Run analysis once (Wrapper)"""
         guilds_c = GuildsRnDaoModel(self.db_client["RnDAO"])
-        guilds = guilds_c.get_connected_guilds()
+        guilds = guilds_c.get_connected_guilds(guildId)
+
         logging.info(f"Creating heatmaps for {guilds}")
         for guild in guilds:
             self.analysis_heatmap(guild)
@@ -87,13 +90,13 @@ class RnDaoAnalyzer:
             f"Listed guilds {rawinfo_c.database.list_collection_names()}")
 
     def getNumberOfActions(self, heatmap):
-        sum = 0
+        sum_ac = 0
         fields = ["thr_messages", "lone_messages", "replier",
                   "replied", "mentioned", "mentioner", "reacter", "reacted"]
         for field in fields:
             for i in range(24):
-                sum += heatmap[field][i]
-        return sum
+                sum_ac += heatmap[field][i]
+        return sum_ac
 
     def analysis_heatmap(self, guild):
         """
@@ -126,10 +129,14 @@ class RnDaoAnalyzer:
                 f"Collection '{rawinfo_c.collection_name}' does not exist")
 
         last_date = heatmap_c.get_last_date()
+
         if last_date == None:
             # If no heatmap was created, than tha last date is the first
             # rawdata entry
             last_date = rawinfo_c.get_first_date()
+            if last_date == None:
+                raise Exception(
+                    f"Collection '{rawinfo_c.collection_name}' does not exist")
             last_date.replace(tzinfo=timezone.utc)
         else:
             last_date = last_date + timedelta(days=1)
@@ -154,7 +161,7 @@ class RnDaoAnalyzer:
                     {
                         # .strftime('%Y-%m-%d %H:%M'),
                         "datetime": entry["datetime"],
-                        "channel": entry["channel"],
+                        "channel": entry["channelId"],
                         "author": entry["author"],
                         "replied_user": entry["replied_user"],
                         "user_mentions": entry["user_mentions"],
@@ -174,14 +181,12 @@ class RnDaoAnalyzer:
             activity = activity_hourly(prepared_list, acc_names=account_list)
             warnings = activity[0]
             heatmap = activity[1][0]
-            # Parsin the activity_hourly into the dictionary
-            numberOfAccounts = len(account_list)
+            # Parsing the activity_hourly into the dictionary
             for heatmap in activity[1]:
-                for i in range(numberOfAccounts):
-                    account = account_list[i]
+                for i in range(len(account_list)):
                     heatmap_dict = {}
                     heatmap_dict["date"] = heatmap["date"][0]
-                    heatmap_dict["channel"] = heatmap["channel"][0]
+                    heatmap_dict["channelId"] = heatmap["channel"][0]
                     heatmap_dict["thr_messages"] = heatmap["thr_messages"][i]
                     heatmap_dict["lone_messages"] = heatmap["lone_messages"][i]
                     heatmap_dict["replier"] = heatmap["replier"][i]
@@ -190,13 +195,75 @@ class RnDaoAnalyzer:
                     heatmap_dict["mentioned"] = heatmap["mentioned"][i]
                     heatmap_dict["reacter"] = heatmap["reacter"][i]
                     heatmap_dict["reacted"] = heatmap["reacted"][i]
-                    heatmap_dict["account_name"] = account
-                    sum = self.getNumberOfActions(heatmap_dict)
-                    if not self.testing and sum > 0:
+                    heatmap_dict["reacted_per_acc"] = store_counts_dict(
+                        dict(Counter(heatmap["reacted_per_acc"][i])))
+                    heatmap_dict["mentioner_per_acc"] = store_counts_dict(
+                        dict(Counter(heatmap["mentioner_per_acc"][i])))
+                    heatmap_dict["replied_per_acc"] = store_counts_dict(
+                        dict(Counter(heatmap["replied_per_acc"][i])))
+                    heatmap_dict["account_name"] = heatmap["acc_names"][i]
+                    sum_ac = self.getNumberOfActions(heatmap_dict)
+
+                    if not self.testing and sum_ac > 0:
                         heatmap_c.insert_one(heatmap_dict)
 
             # analyze next day
             last_date = last_date + timedelta(days=1)
+
+# get guildId from command, if not given return None
+# python ./analyzer.py guildId
+
+
+class AccountCounts:
+    """
+    Class for storing number of interactions per account
+    """
+
+    # define constructor
+    def __init__(self, account, counts):
+
+        self.account = account  # account name
+        self.counts = counts    # number of interactions
+
+    # convert as dict
+    def asdict(self):
+        return {'account': self.account, 'count': self.counts},
+
+
+def getGuildFromCmd():
+    args = sys.argv
+    guildId = None
+    if len(args) == 2:
+        guildId = args[1]
+    return guildId
+
+
+def store_counts_obj(counts_dict):
+
+    # make empty result array
+    obj_array = []
+
+    # for each account
+    for acc in counts_dict.keys():
+
+        # make object and store in array
+        obj_array.append(AccountCounts(acc, counts_dict[acc]))
+
+    return obj_array
+
+
+def store_counts_dict(counts_dict):
+
+    # make empty result array
+    obj_array = []
+
+    # for each account
+    for acc in counts_dict.keys():
+
+        # make dict and store in array
+        obj_array.append(AccountCounts(acc, counts_dict[acc]).asdict())
+
+    return obj_array
 
 
 if __name__ == "__main__":
@@ -216,5 +283,6 @@ if __name__ == "__main__":
         db_user=user,
         db_port=port
     )
+    guildId = getGuildFromCmd()
     analyzer.database_connect()
-    analyzer.run_once()
+    analyzer.run_once(guildId)
