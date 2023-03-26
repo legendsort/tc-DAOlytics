@@ -82,6 +82,9 @@ class RnDaoAnalyzer:
 
         logging.info(f"Creating heatmaps for {guilds}")
         for guild in guilds:
+            window, action = self.get_one_guild(guild)
+            logging.info(window, action)
+            all_users = self.get_all_users(guild)
             self.analysis_heatmap(guild)
 
     def get_guilds(self):
@@ -89,6 +92,22 @@ class RnDaoAnalyzer:
         logging.info(
             f"Listed guilds {rawinfo_c.database.list_collection_names()}")
 
+    def get_one_guild(self, guild):
+        """Get one guild setting from guilds collection by guild"""
+        guild_c = GuildsRnDaoModel(self.db_client["RnDAO"])
+        result = guild_c.get_guild_info(guild)
+        return result
+
+    # need to complete
+    def get_all_users(self, guild):
+        if not guild in self.db_client.list_database_names():
+            logging.error(f"Database {guild} doesn't exist")
+            logging.error(
+                f"Existing databases: {self.db_client.list_database_names()}")
+            logging.info("Continuing")
+            return []
+        return []
+    
     def getNumberOfActions(self, heatmap):
         sum_ac = 0
         fields = ["thr_messages", "lone_messages", "replier",

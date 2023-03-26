@@ -26,6 +26,15 @@ class GuildsRnDaoModel(BaseModel):
         if guildId is not None:
             findOption["guildId"] = guildId
         guilds = self.database[self.collection_name].find(
-            findOption, {"guildId": 1})
-
+            findOption)
         return [x["guildId"] for x in guilds]
+
+    def get_guild_info(self, guildId):
+        """
+        Return detailed information of guild settings
+        Return None if such guild is not exist
+        """
+        guild = self.database[self.collection_name].find({
+            "isDisconnected": False
+        }, {"window": 1, "action": 1})
+        return [guild[0]["window"], guild[0]["action"]]
