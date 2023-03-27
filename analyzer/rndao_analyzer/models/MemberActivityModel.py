@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 import logging
+import pymongo
+import datetime
 
 from models.BaseModel import BaseModel
 
@@ -42,3 +44,16 @@ class MemberActivityModel(BaseModel):
                 }
             }
         }
+    def get_last_date(self):
+        """
+        Gets the date of the last document
+        """
+        try:
+            date_str = self.database[self.collection_name].find().sort(
+                [("first_end_date", pymongo.DESCENDING)]).limit(1)[0]["first_end_date"]
+            date_obj = datetime.strptime(date_str, "%Y-%m-%d")
+            return date_obj
+        except Exception as e:
+            print(e)
+            return None
+

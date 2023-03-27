@@ -13,9 +13,9 @@ import networkx as nx
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
-from compute_interaction_matrix_discord import compute_interaction_matrix_discord
-from analytics_interactions_script import DB_access
-from assess_engagement import assess_engagement
+from analysis.compute_interaction_matrix_discord import compute_interaction_matrix_discord
+from analysis.analytics_interactions_script import DB_access
+from analysis.assess_engagement import assess_engagement
 
 
 # # # # #
@@ -74,8 +74,8 @@ def member_activity_history(db_name, connection_string, channels, acc_names, dat
     # # # DEFINE SLIDING WINDOW RANGE # # #
 
     # determine window start times
-    start_dt = datetime.strptime(date_range[0], '%y/%m/%d')
-    end_dt = datetime.strptime(date_range[1], '%y/%m/%d')
+    start_dt = datetime.strptime(date_range[0], '%y-%m-%d')
+    end_dt = datetime.strptime(date_range[1], '%y-%m-%d')
 
     time_diff = end_dt - start_dt
 

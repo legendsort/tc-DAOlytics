@@ -9,7 +9,7 @@
 import numpy as np
 from datetime import datetime, timedelta
 
-from analytics_interactions_script import (DB_access, Query, sum_interactions_features, per_account_interactions)
+from analysis.analytics_interactions_script import (DB_access, Query, sum_interactions_features, per_account_interactions)
 
 def compute_interaction_matrix_discord(acc_names, dates, channels, db_access):
     """

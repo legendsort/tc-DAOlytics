@@ -35,6 +35,8 @@ class GuildsRnDaoModel(BaseModel):
         Return None if such guild is not exist
         """
         guild = self.database[self.collection_name].find({
-            "isDisconnected": False
-        }, {"window": 1, "action": 1})
-        return [guild[0]["window"], guild[0]["action"]]
+            "guildId": guildId
+        })
+        if guild is None: 
+            return None
+        return guild[0]

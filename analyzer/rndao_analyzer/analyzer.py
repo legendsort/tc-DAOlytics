@@ -14,9 +14,11 @@ from models.GuildModel import GuildModel
 from models.HeatMapModel import HeatMapModel
 from models.RawInfoModel import RawInfoModel
 from models.GuildsRnDaoModel import GuildsRnDaoModel
+from models.MemberActivityModel import MemberActivityModel
 
 # Activity hourly
 from analysis.activity_hourly import activity_hourly
+from analysis.member_activity_history import member_activity_history
 from dotenv import load_dotenv
 
 
@@ -82,10 +84,8 @@ class RnDaoAnalyzer:
 
         logging.info(f"Creating heatmaps for {guilds}")
         for guild in guilds:
-            window, action = self.get_one_guild(guild)
-            logging.info(window, action)
-            all_users = self.get_all_users(guild)
-            self.analysis_heatmap(guild)
+            # self.analysis_heatmap(guild)
+            self.analysis_member_activity(guild)
 
     def get_guilds(self):
         """Returns the list of all guilds"""
@@ -116,6 +116,52 @@ class RnDaoAnalyzer:
             for i in range(24):
                 sum_ac += heatmap[field][i]
         return sum_ac
+
+    def analysis_member_activity(self, guild):
+        """
+        Based on the rawdata creates and stores the member activity data
+        """
+
+        # check current guild is exist
+        if not guild in self.db_client.list_database_names():
+            logging.error(f"Database {guild} doesn't exist")
+            logging.error(
+                f"Existing databases: {self.db_client.list_database_names()}")
+            logging.info("Continuing")
+            return
+        
+        # get current guild setting
+        setting = self.get_one_guild(guild)
+
+
+        CONNECTION_STRING = f"mongodb://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}"
+        channels, window, action = setting["selectedChannels"], setting["window"], setting["action"]
+        channels = list(map(lambda x: x["channelId"], channels))
+        # member_activity_history(guild, CONNECTION_STRING, channels, all_users, date_range, window, action)
+
+        member_activity_c = MemberActivityModel(self.db_client[guild])
+        rawinfo_c = RawInfoModel(self.db_client[guild])
+        
+        # get the last date of analysis
+        # last_date = member_activity_c.get_last_date()
+
+        # if last_date == None:
+        #     # If no member was created, then the last date is the first date of rawdata entry
+        #     first_date = rawinfo_c.get_first_date()
+
+        #     if first_date == None:
+        #         raise Exception(
+        #             f"Collection '{rawinfo_c.collection_name}' does not exist")
+        #     last_date = datetime.now()
+
+        # else:
+        #     last_date = last_date + timedelta(days=1)
+
+
+        # date_range = [(last_date - timedelta(days=6)).astimezone(), last_date]
+        # print(datetime.strptime(date_range[0], '%y-%m-%d'))
+
+
 
     def analysis_heatmap(self, guild):
         """
