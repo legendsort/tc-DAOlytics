@@ -19,6 +19,7 @@ from models.MemberActivityModel import MemberActivityModel
 # Activity hourly
 from analysis.activity_hourly import activity_hourly
 from analysis.member_activity_history import member_activity_history
+from analysis.activity_hourly import parse_reaction
 from dotenv import load_dotenv
 
 
@@ -92,22 +93,57 @@ class RnDaoAnalyzer:
         logging.info(
             f"Listed guilds {rawinfo_c.database.list_collection_names()}")
 
+    # get detailed info from one guild
     def get_one_guild(self, guild):
         """Get one guild setting from guilds collection by guild"""
         guild_c = GuildsRnDaoModel(self.db_client["RnDAO"])
         result = guild_c.get_guild_info(guild)
         return result
+    
+    # insert all elements in child_arr to parent_arr which are not in parent_arr, 
+    def merge_array(self, parent_arr, child_arr):
+        for element in child_arr:
+            if element == '': continue
+            if element not in parent_arr:
+                parent_arr.append(element)
 
-    # need to complete
-    def get_all_users(self, guild):
+    # get all users from one day messages
+    def get_users_from_oneday(self, entries):
+        users = []
+        for entry in entries:
+            # author
+            if entry["author"]: self.merge_array(users, [entry["author"]])
+            # mentioned users
+            mentions = entry["user_mentions"][0].split(",")
+            self.merge_array(users, mentions)
+            # reacters
+            reactions = parse_reaction(entry["reactions"])
+            self.merge_array(users, reactions)
+        return users
+
+    # get all user accounts during date_range in guild from rawinfo data
+    def get_all_users(self, guild, date_range, rawinfo_c):
+        # check guild is exist
         if not guild in self.db_client.list_database_names():
             logging.error(f"Database {guild} doesn't exist")
             logging.error(
                 f"Existing databases: {self.db_client.list_database_names()}")
             logging.info("Continuing")
             return []
-        return []
-    
+        all_users = []
+
+        day = date_range[0]
+        # iterate everyday in date range
+        while day.astimezone() <= date_range[1].astimezone():
+            entries = rawinfo_c.get_day_entries(day)
+            users = self.get_users_from_oneday(entries)
+            # insert all users to all_users who are not in all_users
+            self.merge_array(all_users, users)
+            day = day + timedelta(days = 1)
+
+        return all_users
+
+    # get number of actions 
     def getNumberOfActions(self, heatmap):
         sum_ac = 0
         fields = ["thr_messages", "lone_messages", "replier",
@@ -129,39 +165,46 @@ class RnDaoAnalyzer:
                 f"Existing databases: {self.db_client.list_database_names()}")
             logging.info("Continuing")
             return
-        
-        # get current guild setting
-        setting = self.get_one_guild(guild)
-
-
-        CONNECTION_STRING = f"mongodb://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}"
-        channels, window, action = setting["selectedChannels"], setting["window"], setting["action"]
-        channels = list(map(lambda x: x["channelId"], channels))
-        # member_activity_history(guild, CONNECTION_STRING, channels, all_users, date_range, window, action)
 
         member_activity_c = MemberActivityModel(self.db_client[guild])
         rawinfo_c = RawInfoModel(self.db_client[guild])
+
+        # Testing if there are entries in the rawinfo collection
+        if rawinfo_c.count() == 0:
+            logging.warning(
+                f"No entries in the collection 'rawinfos' in {guild} databse")
+            return
         
-        # get the last date of analysis
-        # last_date = member_activity_c.get_last_date()
+        # get current guild setting
+        setting = self.get_one_guild(guild)
+        CONNECTION_STRING = f"mongodb://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}"
+        channels, window, action = setting["selectedChannels"], setting["window"], setting["action"]
+        channels = list(map(lambda x: x["channelId"], channels))
 
-        # if last_date == None:
-        #     # If no member was created, then the last date is the first date of rawdata entry
-        #     first_date = rawinfo_c.get_first_date()
-
-        #     if first_date == None:
-        #         raise Exception(
-        #             f"Collection '{rawinfo_c.collection_name}' does not exist")
-        #     last_date = datetime.now()
-
-        # else:
-        #     last_date = last_date + timedelta(days=1)
+        # change window object to array
 
 
-        # date_range = [(last_date - timedelta(days=6)).astimezone(), last_date]
-        # print(datetime.strptime(date_range[0], '%y-%m-%d'))
+        # get date range to be analyzed
+        last_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
 
+        if member_activity_c.count() == 0:
+            """This is the first analysis"""
+            first_date = rawinfo_c.get_first_date().replace(hour=0, minute=0, second=0, microsecond=0)
+        else:
+            """This is daily analysis"""
+            first_date = (last_date - timedelta(days=window[0])).replace(hour=0, minute=0, second=0, microsecond=0)
+        
+        date_range = [first_date, last_date]
+        # get all users during date_range
+        all_users = self.get_all_users(guild, date_range, rawinfo_c)
 
+        # change format like 23/03/27
+        date_range = [dt.strftime("%y/%m/%d") for dt in date_range]
+        print(date_range)
+        # get member activity history
+        network, activity = member_activity_history(guild, CONNECTION_STRING, channels, all_users, date_range, window, action)
+        logging.info(network)
+        logging.info(activity)
 
     def analysis_heatmap(self, guild):
         """

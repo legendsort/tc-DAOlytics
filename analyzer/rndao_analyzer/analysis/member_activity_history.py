@@ -72,10 +72,10 @@ def member_activity_history(db_name, connection_string, channels, acc_names, dat
 
 
     # # # DEFINE SLIDING WINDOW RANGE # # #
-
+    print(window_param)
     # determine window start times
-    start_dt = datetime.strptime(date_range[0], '%y-%m-%d')
-    end_dt = datetime.strptime(date_range[1], '%y-%m-%d')
+    start_dt = datetime.strptime(date_range[0], '%y/%m/%d')
+    end_dt = datetime.strptime(date_range[1], '%y/%m/%d')
 
     time_diff = end_dt - start_dt
 
