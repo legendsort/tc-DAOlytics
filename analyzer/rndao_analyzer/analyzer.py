@@ -187,25 +187,34 @@ class RnDaoAnalyzer:
         # get date range to be analyzed
         last_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
 
+        first_time = False
         if member_activity_c.count() == 0:
             """This is the first analysis"""
+            first_time = True
             first_date = rawinfo_c.get_first_date().replace(hour=0, minute=0, second=0, microsecond=0)
         else:
-            """This is daily analysis"""
-            first_date = (last_date - timedelta(days=window[0])).replace(hour=0, minute=0, second=0, microsecond=0)
-        
+            """This is a daily analysis"""
+            first_date = (last_date - timedelta(days=window[0]-1)).replace(hour=0, minute=0, second=0, microsecond=0)
+
+        first_end_date = first_date + timedelta(days=window[0]-1)
+
         date_range = [first_date, last_date]
         # get all users during date_range
         all_users = self.get_all_users(guild, date_range, rawinfo_c)
-
+        logging.info(all_users)
         # change format like 23/03/27
         date_range = [dt.strftime("%y/%m/%d") for dt in date_range]
-        print(date_range)
+        logging.info(date_range)
         # get member activity history
         network, activity = member_activity_history(guild, CONNECTION_STRING, channels, all_users, date_range, window, action)
-        logging.info(network)
-        logging.info(activity)
 
+        if first_time:
+            # create member activity document
+            activity["first_end_date"] = first_end_date
+            logging.info(activity)
+            member_activity_c.insert_one(activity)
+        return True
+        
     def analysis_heatmap(self, guild):
         """
         Based on the rawdata creates and stores the heatmap data

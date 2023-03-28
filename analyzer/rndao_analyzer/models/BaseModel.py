@@ -27,7 +27,7 @@ class BaseModel():
     def insert_one(self, obj_dict, create=False):
         """
         Inserts one document into the defined collection
-        If create is True than a new collection is created
+        If create is True then a new collection is created
         """
         if create:
             if not self.exists:
