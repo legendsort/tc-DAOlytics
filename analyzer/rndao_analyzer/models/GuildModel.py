@@ -36,10 +36,10 @@ class GuildModel(BaseModel):
                     "isDisconnected": {
                         "bsonType": "bool"
                     },
-                 "icon": {
-                               "bsonType": "string"
+                    "icon": {
+                        "bsonType": "string"
                     },
-                    
+
 
                     "selectedChannels": {
                         "bsonType": "array",

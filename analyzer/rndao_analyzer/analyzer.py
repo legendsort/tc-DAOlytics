@@ -208,6 +208,13 @@ class RnDaoAnalyzer:
         # get member activity history
         network, activity = member_activity_history(guild, CONNECTION_STRING, channels, all_users, date_range, window, action)
 
+        for key in activity.keys():
+            if isinstance(activity[key], dict):
+                for k in activity[key].keys():
+                    activity[key][k] = list(activity[key][k])
+            else:
+                activity[key] = list(activity[key])
+                
         if first_time:
             # create member activity document
             activity["first_end_date"] = first_end_date

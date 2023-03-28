@@ -18,29 +18,57 @@ class MemberActivityModel(BaseModel):
             "$jsonSchema": {
                 "bsonType": "object",
                 "properties": {
-                    "lastDate": {
+                    "first_end_date": {
                         "bsonType": "date",
                     },
-                    "activeAccounts": {
-                        "bsonType": "array",
-                        "items": {
-                            "bsonType": "string"
-                        }
+                    "all_active": {
+                        "bsonType": "object",
                     },
-                    "joinedAccounts": {
-                        "bsonType": "array",
-                        "items": {
-                            "bsonType": "string"
-                        }
+                    "all_consistent": {
+                        "bsonType": "object",
                     },
-                    "connectedAccounts": {
-                        "bsonType": "array",
-                        "items": {
-                            "bsonType": "string"
-                        }
+                    "all_vital": {
+                        "bsonType": "object",
                     },
-
-
+                    "all_connected": {
+                        "bsonType": "object",
+                    },
+                    "all_paused": {
+                        "bsonType": "object",
+                    },
+                    "all_new_disengaged": {
+                        "bsonType": "object",
+                    },
+                    "all_disengaged": {
+                        "bsonType": "object",
+                    },
+                    "all_unpaused": {
+                        "bsonType": "object",
+                    },
+                    "all_returned": {
+                        "bsonType": "object",
+                    },
+                    "all_new_active": {
+                        "bsonType": "object",
+                    },
+                    "all_still_active": {
+                        "bsonType": "object",
+                    },
+                    "all_dropped": {
+                        "bsonType": "object",
+                    },
+                    "all_joined": {
+                        "bsonType": "object",
+                    },
+                    "all_disengaged_were_newly_active": {
+                        "bsonType": "object",
+                    },
+                    "all_disengaged_were_consistenly_active": {
+                        "bsonType": "object",
+                    },
+                    "all_disengaged_were_vital": {
+                        "bsonType": "object",
+                    },
                 }
             }
         }
