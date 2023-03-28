@@ -4,6 +4,7 @@ import logging
 from typing import TypedDict
 from models.BaseModel import BaseModel
 
+
 class GuildModel(BaseModel):
     def __init__(self, database=None):
         if database is None:
@@ -13,35 +14,61 @@ class GuildModel(BaseModel):
             collection_name="guild",
             database=database)
         self.validator = {
-            "$jsonSchema" :{
+            "$jsonSchema": {
                 "bsonType": "object",
-                "required" : ["guildId","user"],
-                "properties":{
-                    "guildId":{
+                "required": ["guildId", "user"],
+                "properties": {
+                    "guildId": {
                         "bsonType": "string",
                     },
-                    "user":{
+                    "user": {
                         "bsonType": "objectId",
                     },
-                    "name":{
-                       "bsonType":"string"
+                    "name": {
+                        "bsonType": "string"
                     },
+                    "connectedAt": {
+                        "bsonType": "date"
+                    },
+                    "isInProgress": {
+                        "bsonType": "bool"
+                    },
+                    "isDisconnected": {
+                        "bsonType": "bool"
+                    },
+                 "icon": {
+                               "bsonType": "string"
+                    },
+                    
+
                     "selectedChannels": {
-                        "bsonType":"array",
-                        "items":{
-                            "properties":{
-                                "channelId":{
-                                    "bsonType":"string"
+                        "bsonType": "array",
+                        "items": {
+                            "properties": {
+                                "channelId": {
+                                    "bsonType": "string"
                                 },
-                                "channelName":{
-                                    "bsonType":"string"
+                                "channelName": {
+                                    "bsonType": "string"
                                 }
                             }
                         }
                     },
-                    "period":{
-                        "bsonType":"date"
-                    }
+                    "period": {
+                        "bsonType": "date"
+                    },
+                    "action": {
+                        "bsonType": "array",
+                        "items": {
+                            "bsonType": "int"
+                        }
+                    },
+                    "window": {
+                        "bsonType": "array",
+                        "items": {
+                            "bsonType": "int"
+                        }
+                    },
                 }
             }
         }
