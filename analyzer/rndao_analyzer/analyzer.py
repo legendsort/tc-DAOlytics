@@ -19,8 +19,9 @@ from models.MemberActivityModel import MemberActivityModel
 # Activity hourly
 from analysis.activity_hourly import activity_hourly
 from analysis.member_activity_history import member_activity_history
-from analysis.activity_hourly import parse_reaction
 from dotenv import load_dotenv
+
+
 
 
 class RnDaoAnalyzer:
@@ -85,7 +86,9 @@ class RnDaoAnalyzer:
 
         logging.info(f"Creating heatmaps for {guilds}")
         for guild in guilds:
-            # self.analysis_heatmap(guild)
+            print("A--->")
+            self.analysis_heatmap(guild)
+            print("B---->")
             self.analysis_member_activity(guild)
 
     def get_guilds(self):
@@ -107,6 +110,16 @@ class RnDaoAnalyzer:
             if element not in parent_arr:
                 parent_arr.append(element)
 
+    def parse_reaction(self, s):
+        result = []
+        for subitem in s:
+            items = subitem.split(',')
+            parsed_items = []
+            for item in items:
+                parsed_items.append(item)
+            self.merge_array(result, result[:-1])
+        return result
+
     # get all users from one day messages
     def get_users_from_oneday(self, entries):
         users = []
@@ -117,7 +130,7 @@ class RnDaoAnalyzer:
             mentions = entry["user_mentions"][0].split(",")
             self.merge_array(users, mentions)
             # reacters
-            reactions = parse_reaction(entry["reactions"])
+            reactions = self.parse_reaction(entry["reactions"])
             self.merge_array(users, reactions)
         return users
 
@@ -196,8 +209,6 @@ class RnDaoAnalyzer:
             """This is a daily analysis"""
             first_date = (last_date - timedelta(days=window[0]-1)).replace(hour=0, minute=0, second=0, microsecond=0)
 
-        first_end_date = first_date + timedelta(days=window[0]-1)
-
         date_range = [first_date, last_date]
         # get all users during date_range
         all_users = self.get_all_users(guild, date_range, rawinfo_c)
@@ -207,21 +218,24 @@ class RnDaoAnalyzer:
         logging.info(date_range)
         # get member activity history
         network, activity = member_activity_history(guild, CONNECTION_STRING, channels, all_users, date_range, window, action)
-
+        logging.info(activity)
         for key in activity.keys():
             if isinstance(activity[key], dict):
                 for k in activity[key].keys():
                     activity[key][k] = list(activity[key][k])
             else:
                 activity[key] = list(activity[key])
-                
+
         if first_time:
             # create member activity document
-            activity["first_end_date"] = first_end_date
-            logging.info(activity)
+            activity["first_end_date"] = last_date
+            # logging.info(activity)
+            # insert into database
             member_activity_c.insert_one(activity)
+        else:
+            logging.info(activity)
         return True
-        
+            
     def analysis_heatmap(self, guild):
         """
         Based on the rawdata creates and stores the heatmap data
