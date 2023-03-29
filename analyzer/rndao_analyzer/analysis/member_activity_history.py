@@ -16,6 +16,7 @@ from dateutil.relativedelta import relativedelta
 from compute_interaction_matrix_discord import compute_interaction_matrix_discord
 from analytics_interactions_script import DB_access
 from assess_engagement import assess_engagement
+from member_activity_history_past import check_past_history
 
 
 # # # # #
@@ -71,16 +72,16 @@ def member_activity_history(db_name, connection_string, channels, acc_names, dat
     ignore_features_db = {'date': 0, 'account_name': 0, 'channel': 0, '_id': 0}
 
 
-    # # # DEFINE SLIDING WINDOW RANGE # # #
+    # # # # DEFINE SLIDING WINDOW RANGE # # #
 
-    # determine window start times
-    start_dt = datetime.strptime(date_range[0], '%y/%m/%d')
-    end_dt = datetime.strptime(date_range[1], '%y/%m/%d')
+    # # determine window start times
+    # start_dt = datetime.strptime(date_range[0], '%y/%m/%d')
+    # end_dt = datetime.strptime(date_range[1], '%y/%m/%d')
 
-    time_diff = end_dt - start_dt
+    # time_diff = end_dt - start_dt
 
-    # determine maximum start time (include last day in date_range)
-    last_start = time_diff - relativedelta(days = window_param[0]-1)
+    # # determine maximum start time (include last day in date_range)
+    # last_start = time_diff - relativedelta(days = window_param[0]-1)
 
     # initiate result dictionary for network graphs
     network_dict = {}
@@ -99,18 +100,62 @@ def member_activity_history(db_name, connection_string, channels, acc_names, dat
     all_unpaused = {}
     all_returned = {}
 
-    # # # TO BE IMPLEMENTED: check if there is any past data and if so, load this data instead of creating new dicts
+    # # # checking if there is any past data and if so, load this data instead of creating new dicts
 
+    activity_names_list = ['all_arrived', 
+                       'all_consistent',
+                       'all_vital',
+                       'all_active',
+                       'all_connected',
+                       'all_paused',
+                       'all_new_disengaged',
+                       'all_disengaged',
+                       'all_unpaused',
+                       'all_returned',
+                       'all_new_active',
+                       'all_still_active'] 
+    
+
+    ## past_activities_date is the data from past activities
+    ## new_date_range is defined to change the date_range with past data loaded
+    ## starting_key is the starting key of actuall analysis 
+    past_activities_data, new_date_range, starting_key = check_past_history(db_access=db_access, 
+                       date_range=date_range,
+                       ## retrive these activities if available
+                       activity_names_list=activity_names_list,
+                       TABLE_NAME='memberactivities'
+                       )
+    
+    ## if in past there was an activity, we'll update the dictionaries
+    if past_activities_data != {}:
+        (all_arrived, all_consistent, all_vital, all_active, all_connected,
+            all_paused, all_new_disengaged, all_disengaged, all_unpaused,
+            all_returned, all_new_active, all_still_active) = update_activities(past_activities=past_activities_data,
+                                                                                activities_list=activity_names_list)
+    
+    # # # DEFINE SLIDING WINDOW RANGE # # #
+
+    # determine window start times
+    start_dt = new_date_range[0]
+    end_dt = new_date_range[1]
+
+    time_diff = end_dt - start_dt
+
+    # determine maximum start time (include last day in date_range)
+    last_start = time_diff - relativedelta(days = window_param[0]-1)
+    
 
     # # # ACTUAL ANALYSIS # # #
 
     # for every window index
     for w_i in range(int(np.floor(last_start.days / window_param[1]) + 1)):
-
-        # print("window {} of {}".format(w_i + 1, int(np.floor(last_start.days / window_param[1]) + 1)))
+        
+        ## update the window index with the data available
+        new_window_i = w_i + starting_key
+        # print("window {} of {}".format(new_window_i + 1, int(np.floor(last_start.days / window_param[1]) + 1)))
 
         # find last date of window
-        last_date_w = start_dt + relativedelta(days=window_param[1] * w_i) + relativedelta(days=window_param[0]-1)
+        last_date_w = start_dt + relativedelta(days=window_param[1] * new_window_i) + relativedelta(days=window_param[0]-1)
 
         # make list of all dates in window
         date_list_w = [last_date_w - relativedelta(days=x) for x in range(window_param[0])]
@@ -131,7 +176,7 @@ def member_activity_history(db_name, connection_string, channels, acc_names, dat
         # assess engagement
         [graph_out, all_arrived, all_consistent, all_vital, all_active, all_connected, all_paused, all_new_disengaged,
          all_disengaged, all_unpaused, all_returned, all_new_active, all_still_active] = assess_engagement(int_mat,
-         w_i, np.asarray(acc_names), act_param, window_param[0], all_arrived, all_consistent, all_vital, all_active,
+         new_window_i, np.asarray(acc_names), act_param, window_param[0], all_arrived, all_consistent, all_vital, all_active,
          all_connected, all_paused, all_new_disengaged, all_disengaged, all_unpaused, all_returned, all_new_active,
          all_still_active)
 
@@ -169,6 +214,20 @@ def member_activity_history(db_name, connection_string, channels, acc_names, dat
     activity_dict["all_still_active"] = all_still_active
 
     return [network_dict, activity_dict]
+
+def update_activities(past_activities, activities_list):
+    """
+    update activities variables using `past_activities` variable
+    note: `past_activities` variable contains all the activities from past 
+    """
+    ## built-in python library
+    ## no worries to install it
+    from operator import itemgetter
+
+    ## getting all dictionary values with the order of `activities_list`
+    activity_dictionaries = itemgetter(*activities_list, past_activities)
+    
+    return activity_dictionaries
 
 
 if __name__ == "__main__":
