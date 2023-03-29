@@ -22,8 +22,6 @@ from analysis.member_activity_history import member_activity_history
 from dotenv import load_dotenv
 
 
-
-
 class RnDaoAnalyzer:
     """
     RnDaoAnalyzer
@@ -102,11 +100,12 @@ class RnDaoAnalyzer:
         guild_c = GuildsRnDaoModel(self.db_client["RnDAO"])
         result = guild_c.get_guild_info(guild)
         return result
-    
-    # insert all elements in child_arr to parent_arr which are not in parent_arr, 
+
+    # insert all elements in child_arr to parent_arr which are not in parent_arr,
     def merge_array(self, parent_arr, child_arr):
         for element in child_arr:
-            if element == '': continue
+            if element == '':
+                continue
             if element not in parent_arr:
                 parent_arr.append(element)
 
@@ -125,7 +124,8 @@ class RnDaoAnalyzer:
         users = []
         for entry in entries:
             # author
-            if entry["author"]: self.merge_array(users, [entry["author"]])
+            if entry["author"]:
+                self.merge_array(users, [entry["author"]])
             # mentioned users
             mentions = entry["user_mentions"][0].split(",")
             self.merge_array(users, mentions)
@@ -152,11 +152,11 @@ class RnDaoAnalyzer:
             users = self.get_users_from_oneday(entries)
             # insert all users to all_users who are not in all_users
             self.merge_array(all_users, users)
-            day = day + timedelta(days = 1)
+            day = day + timedelta(days=1)
 
         return all_users
 
-    # get number of actions 
+    # get number of actions
     def getNumberOfActions(self, heatmap):
         sum_ac = 0
         fields = ["thr_messages", "lone_messages", "replier",
@@ -187,7 +187,7 @@ class RnDaoAnalyzer:
             logging.warning(
                 f"No entries in the collection 'rawinfos' in {guild} databse")
             return
-        
+
         # get current guild setting
         setting = self.get_one_guild(guild)
         CONNECTION_STRING = f"mongodb://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}"
@@ -196,7 +196,6 @@ class RnDaoAnalyzer:
 
         # change window object to array
 
-
         # get date range to be analyzed
         last_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
 
@@ -204,21 +203,24 @@ class RnDaoAnalyzer:
         if member_activity_c.count() == 0:
             """This is the first analysis"""
             first_time = True
-            first_date = rawinfo_c.get_first_date().replace(hour=0, minute=0, second=0, microsecond=0)
+            first_date = rawinfo_c.get_first_date().replace(
+                hour=0, minute=0, second=0, microsecond=0)
         else:
             """This is a daily analysis"""
-            first_date = (last_date - timedelta(days=window[0]-1)).replace(hour=0, minute=0, second=0, microsecond=0)
+            first_date = (last_date - timedelta(days=window[0]-1)).replace(
+                hour=0, minute=0, second=0, microsecond=0)
 
         date_range = [first_date, last_date]
         # get all users during date_range
         all_users = self.get_all_users(guild, date_range, rawinfo_c)
-        logging.info(all_users)
+        # logging.info(all_users)
         # change format like 23/03/27
         date_range = [dt.strftime("%y/%m/%d") for dt in date_range]
-        logging.info(date_range)
+        # logging.info(date_range)
         # get member activity history
-        network, activity = member_activity_history(guild, CONNECTION_STRING, channels, all_users, date_range, window, action)
-        logging.info(activity)
+        network, activity = member_activity_history(
+            guild, CONNECTION_STRING, channels, all_users, date_range, window, action)
+        # logging.info(activity)
         for key in activity.keys():
             if isinstance(activity[key], dict):
                 for k in activity[key].keys():
@@ -228,14 +230,14 @@ class RnDaoAnalyzer:
 
         if first_time:
             # create member activity document
-            activity["first_end_date"] = last_date
+            activity["first_end_date"] = first_date + timedelta(days=window[0] - 1)
             # logging.info(activity)
             # insert into database
             member_activity_c.insert_one(activity)
         else:
             logging.info(activity)
         return True
-            
+
     def analysis_heatmap(self, guild):
         """
         Based on the rawdata creates and stores the heatmap data
