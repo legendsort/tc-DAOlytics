@@ -11,6 +11,7 @@
 
 ## Importing libraries
 import datetime
+import numpy as np
 
 ## the main script function
 def check_past_history(db_access, 
@@ -53,29 +54,60 @@ def check_past_history(db_access,
           its length is: {len(date_range)}""")
     
     ## creating the query
-    query = create_past_history_query(date_range)
+    # query = create_past_history_query(date_range)
+    ## At the time we have one document in mongoDB
+    ## there's no need to query the db
+    query = {}
     ## do not project the variables that we don't need
     feature_projection = {
-        'first_end_date': 1,
+        # 'first_end_date': 1,
+        # 'all_consistent': 1,
         '_id': 0
     }
-    ## sorting the results from past to now (ascending)
-    ## sorting by `first_end_date` 
-    sorting = ['first_end_date', 1]
+    ### One document doesn't need sorting
+    # ## sorting the results from past to now (ascending)
+    # ## sorting by `first_end_date` 
+    # sorting = ['first_end_date', 1]
 
     ## quering the db now
     cursor = db_access.query_db_find(TABLE_NAME, 
                         query,
                         feature_projection,
-                        sorting)
+                        # sorting
+                        )
     ## getting a list of returned data
     past_data = list(cursor)
-    ## if there was some data in past
+
+    if len(past_data) > 1:
+        raise NotImplementedError("""The corresponding label for now should have 1 document!
+                                    The analysis implemented now just can support 1 document!""")
+
+    ## if any past data was available in DB
     if past_data != []:
-        ## get the last analysis date, to refine the date, it's in datetime format
-        last_end_date_activity = past_data[-1]['first_end_date']
+        db_analysis_start_date = past_data[0]['first_end_date']
+        days_after_analysis_start = int(max(list(past_data[0]['all_consistent'].keys())))
+        db_analysis_end_date = db_analysis_start_date + datetime.timedelta(days=days_after_analysis_start)
+    else:
+        db_analysis_start_date = None
+        db_analysis_end_date = None
+
+    ## the input date_range in format of datetime
+    ## converting the dates into datetime format
+    date_format = '%y/%m/%d'
+    date_range_start = datetime.datetime.strptime(date_range[0], date_format)
+    date_range_end = datetime.datetime.strptime(date_range[1], date_format)
+    
+
+    ## if for the requested date_range, its results were available in db 
+    if (db_analysis_end_date is not None) and (date_range_start < db_analysis_end_date):
+
         ## refine the dates
-        new_date_range = [last_end_date_activity, datetime.datetime.strptime(date_range[1], '%y/%m/%d')]
+        ## if the range end was smaller than the analysis end, then empty the new_date_range
+        ## empty it, since all the requested analysis are available in db
+        if date_range_end < db_analysis_end_date:
+            new_date_range = []
+        else:
+            new_date_range = [db_analysis_end_date, date_range_end]
 
         ## if the activity_names_list wasn't given
         ## then just stick to the activities that were available in db
@@ -91,15 +123,10 @@ def check_past_history(db_access,
         
         # append the activities data together with increasing indexes
         ## maximum key is used for having the key for future data
-        all_activity_data_dict, maximum_key = append_all_past_data(past_data, activity_names_list_)
+        all_activity_data_dict, maximum_key = append_all_past_data(past_data, activity_names_list_, days_after_analysis_start)
     else:
         all_activity_data_dict = {}
-        ## converting the dates into datetime format
-        date_format = '%y/%m/%d'
-        date_start = datetime.datetime.strptime(date_range[0], date_format)
-        date_end = datetime.datetime.strptime(date_range[1], date_format)
-
-        new_date_range = [date_start, date_end]
+        new_date_range = [date_range_start, date_range_end]
         maximum_key = 0
 
 
@@ -107,35 +134,35 @@ def check_past_history(db_access,
 
 
 
-def create_past_history_query(date_range):
-    """
-    create a query that retreive the data which are not analyzed
+# def create_past_history_query(date_range):
+#     """
+#     create a query that retreive the data which are not analyzed
 
-    Parameters:
-    -------------
-    date_range: list
-        a list of length 2, the first index has the start of the interval
-        and the second index is end of the interval
+#     Parameters:
+#     -------------
+#     date_range: list
+#         a list of length 2, the first index has the start of the interval
+#         and the second index is end of the interval
     
-    Returns:
-    ----------
-    query : dictionary
-        the query representing the dictionary of filters
-    """
-    date_interval_start = datetime.datetime.strptime(date_range[0], '%y/%m/%d')
-    date_interval_end = datetime.datetime.strptime(date_range[1], '%y/%m/%d')
+#     Returns:
+#     ----------
+#     query : dictionary
+#         the query representing the dictionary of filters
+#     """
+#     date_interval_start = datetime.datetime.strptime(date_range[0], '%y/%m/%d')
+#     date_interval_end = datetime.datetime.strptime(date_range[1], '%y/%m/%d')
 
-    query = { 
-        'first_end_date': {
-            ## the given date_range in script analysis
-            '$gt': date_interval_start,
-            '$lt': date_interval_end
-        } 
-    }
+#     query = { 
+#         'first_end_date': {
+#             ## the given date_range in script analysis
+#             '$gt': date_interval_start,
+#             '$lt': date_interval_end
+#         } 
+#     }
 
-    return query
+#     return query
 
-def append_all_past_data(retrived_past_data, activity_names_list):
+def append_all_past_data(retrived_past_data, activity_names_list, starting_idx=0):
     """
     Append all past activities together
 
@@ -145,6 +172,15 @@ def append_all_past_data(retrived_past_data, activity_names_list):
         list of dictionaries, having all the activities in it
     activity_names_list : list
         the activities to filter
+    starting_idx : int
+        the data of activities that should be started from the index
+        in another words it would be started from which day
+        default is 0, meaning all the past data from the starting point of `first_end_date` will be included
+
+    Returns:
+    ----------
+    all_activity_data_dict : dictionary
+        the analyzed data with refined keys
     maximum_key : int
         the maximum key of the data
     """
@@ -156,7 +192,7 @@ def append_all_past_data(retrived_past_data, activity_names_list):
         activity_data_list = list(activity_data_map)
         ## making all the dictionary in the list to one dictionary with refined keys
         # activity_data_dict = map( refine_dict_indexes ,activity_data_list)
-        activity_data_dict, max_key_val = refine_dict_indexes(activity_data_list)
+        activity_data_dict, max_key_val = refine_dict_indexes(activity_data_list, starting_idx)
 
         maximum_key_values.append(max_key_val)
         ## add it to the new dictionary
@@ -164,7 +200,7 @@ def append_all_past_data(retrived_past_data, activity_names_list):
     
     return all_activity_data_dict, max(maximum_key_values)
 
-def refine_dict_indexes(data_dict_list):
+def refine_dict_indexes(data_dict_list, starting_idx=0):
     """
     refine the indexes in dictionary
 
@@ -172,6 +208,10 @@ def refine_dict_indexes(data_dict_list):
     ------------
     data_dict_list : list of dictionaries
         list of dictionaries, each with keys '0','1', '2', etc
+    starting_idx : int
+        the data of activities that should be started from the index
+        in another words it would be started from which day
+        default is 0, meaning all the past data from the starting point of `first_end_date` will be included
 
     Returns:
     -----------
@@ -183,11 +223,16 @@ def refine_dict_indexes(data_dict_list):
     """
     data_dict_appended = {}
     max_key_val = 0
+    ## for each activity dictionary
     for dictionary in data_dict_list:
         ## if the dictionary was not empty, do the followings
         if dictionary != {}:
             ## get all the keys in integer format
             indices_list = list(map(lambda x: int(x) ,dictionary.keys()))
+            ## converting to numpy to be able to filter them
+            indices_list = np.array(indices_list)
+            ## filtering them
+            indices_list = indices_list[indices_list > starting_idx]
             ## incrementing and converting the indices of the dictionary to string  
             indices_list = list(map(lambda x: str(x + max_key_val), indices_list))
             ## creating new dictionary with new indices
