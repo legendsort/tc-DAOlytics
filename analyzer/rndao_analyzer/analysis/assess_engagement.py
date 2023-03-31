@@ -515,7 +515,7 @@ def check_past(data_dic, t_thr, o_thr, WINDOW_D):
 
 def make_graph(mat):
     """
-    Turns interaction matrix into graph object
+    Turns interaction matrix into a directed graph object
 
     Input:
     mat - np.array : interaction matrix
@@ -524,19 +524,23 @@ def make_graph(mat):
     graph - graph object: interaction graph
     """
 
-    # make empty result matrix (for undirected matrix)
-    new_mat = np.zeros_like(mat)
+    ###### The commented codes were written for creating undirected graph    
+    # # make empty result matrix (for undirected matrix)
+    # new_mat = np.zeros_like(mat)
 
-    # for each row
-    for r in range(np.shape(mat)[0]):
+    # # for each row
+    # for r in range(np.shape(mat)[0]):
 
-        # for each column
-        for c in range(r):
+    #     # for each column
+    #     for c in range(r):
 
-            # sum (r,c) and (c,r) values and store
-            new_mat[r, c] = mat[r, c] + mat[c, r]
+    #         # sum (r,c) and (c,r) values and store
+    #         new_mat[r, c] = mat[r, c] + mat[c, r]
 
-    # turn matrix into graph
-    graph = nx.from_numpy_array(new_mat)
+    # # turn matrix into graph
+    # graph = nx.from_numpy_array(new_mat)
+
+    ## turn into directed graph
+    graph = nx.from_numpy_array(mat, create_using=nx.DiGraph)
 
     return graph
