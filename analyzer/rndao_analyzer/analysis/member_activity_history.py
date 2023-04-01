@@ -17,6 +17,9 @@ from compute_interaction_matrix_discord import compute_interaction_matrix_discor
 from analytics_interactions_script import DB_access
 from assess_engagement import assess_engagement
 from member_activity_history_past import check_past_history
+from network_graph import make_graph_list_query
+from neo4j import GraphDatabase
+
 
 
 # # # # #
@@ -54,6 +57,8 @@ def member_activity_history(db_name, connection_string, channels, acc_names, dat
     network_dict: {datetime:networkx obj} - dictionary with python datetime objects as keys and networkx graph
         objects as values. The keys reflect the last date of the WINDOW_D day window over which the network was
         computed. The values contain the computed networks.
+    analysis_network_dict : {datetime:networkx obj} - same as `network_dict`
+        It's just the new analysis dict that should be saved
     activity_dict: {str:{str:set}} - dictionary with keys reflecting each member activity type and dictionaries as
         values. Each nested dictionary contains an index string as key reflecting the number of STEP_D steps have been
         taken since the first analysis period. The values in the nested dictionary are python sets with account names
@@ -125,6 +130,9 @@ def member_activity_history(db_name, connection_string, channels, acc_names, dat
     if new_date_range != []:
         # # # DEFINE SLIDING WINDOW RANGE # # #
 
+        ## another variable just to save the newly created graphs
+        analysis_network_dict = {}
+
         # determine window start times
         start_dt = new_date_range[0]
         end_dt = new_date_range[1]
@@ -182,6 +190,8 @@ def member_activity_history(db_name, connection_string, channels, acc_names, dat
 
             # store results in dictionary
             network_dict[last_date_w] = graph_out
+            ## saving just the newly created graphs
+            analysis_network_dict[last_date_w] = graph_out        
 
 
     # # # STORE RESULTS IN FINAL DICTIONARY # # #
@@ -203,7 +213,7 @@ def member_activity_history(db_name, connection_string, channels, acc_names, dat
     activity_dict["all_new_active"] = all_new_active
     activity_dict["all_still_active"] = all_still_active
 
-    return [network_dict, activity_dict]
+    return [network_dict, analysis_network_dict, activity_dict]
 
 def update_activities(past_activities, activities_list):
     """
@@ -218,6 +228,42 @@ def update_activities(past_activities, activities_list):
     activity_dictionaries = itemgetter(*activities_list)(past_activities)
     
     return activity_dictionaries
+
+def store_networkx_into_neo4j(network_dict, driver, dbName):
+    """
+    store the networkx graph into neo4j db
+
+    Parameters:
+    -------------
+    networkx_graphs : list of networkx.classes.graph.Graph or networkx.classes.digraph.DiGraph
+        the list of graph created from user interactions
+    networkx_dates : list of dates
+        the dates for each graph
+    driver : neo4j._sync.driver.BoltDriver
+        the driver to connect to neo4j db
+    dbName : str
+        the database name to save the results in it
+    """
+    ## extract the graphs and their corresponding interaction dates
+    graph_list, graph_dates = list(network_dict.values()), list(network_dict.keys())
+
+    ## make a list of queries for each date to save the Useraccount and INTERACTED relation between them 
+    queries_list = make_graph_list_query(graph_list, graph_dates)
+
+    ## a function to just run the queries inside database session
+    identity_function = lambda tx, query: tx.run(query)
+
+    try:
+        for query in queries_list:
+            with driver.session(database=dbName) as session:
+                session.execute_write(
+                    identity_function,
+                    query=query
+                )
+    except Exception as e:
+        print(f"Error saving the user interactions! exception: {e}")
+
+
 
 
 if __name__ == "__main__":
@@ -252,8 +298,19 @@ if __name__ == "__main__":
     STILL_O_THR = 2  # times to be active within STILL_T_THR to be still active	    Default = 2
 
     ## call function
-    data_out = member_activity_history(DB_NAME, CONNECTION_STRING, channels, acc_names, date_range, [WINDOW_D, STEP_D],
+    data_network_dict, new_network_dict, data_activity_dict = member_activity_history(DB_NAME, CONNECTION_STRING, channels, acc_names, date_range, [WINDOW_D, STEP_D],
                                      [INT_THR, UW_DEG_THR, PAUSED_T_THR, CON_T_THR, CON_O_THR, EDGE_STR_THR, UW_THR_DEG_THR,
                                       VITAL_T_THR, VITAL_O_THR, STILL_T_THR, STILL_O_THR])
 
-    print(data_out)
+    print(data_network_dict, data_activity_dict)
+
+    ### saving the newly created dict for network analysis 
+    if new_network_dict != {}:
+        URI = 'bolt://localhost:7687/neo4j'
+        AUTH = ("neo4j", "password")
+
+        with GraphDatabase.driver(URI, auth=AUTH) as driver: 
+            driver.verify_connectivity() 
+
+        store_networkx_into_neo4j(new_network_dict, driver, dbName='neo4j')
+    
