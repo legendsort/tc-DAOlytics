@@ -91,6 +91,7 @@ def make_create_network_query(nodes_dict, edge_dict, graph_date, nodes_type='Dis
         node_acc_name = node[1]['acc_name']
         ## creating the query
         acc_query += f'MERGE (a{node_num}:{nodes_type} {{Username: \'{node_acc_name}\'}})   '
+        acc_query += f"""ON CREATE SET a{node_num}.CreatedAt = '{iso_date_now}'"""
     
     rel_query = ''
     for idx, edge in enumerate(edge_dict):
@@ -104,7 +105,7 @@ def make_create_network_query(nodes_dict, edge_dict, graph_date, nodes_type='Dis
         interaction_count = edge[2]['weight']
 
         ## creating the relationship query
-        rel_query += f"""MERGE (a{starting_acc_num}) -[rel{idx}:INTERACTED]-> (a{ending_acc_num})"""
+        rel_query += f"""MERGE (a{starting_acc_num}) -[rel{idx}:{rel_type}]-> (a{ending_acc_num})"""
         rel_query += f"""ON MATCH 
                             SET 
                                 rel{idx}.dates = rel{idx}.dates + ['{iso_date_str}'],
