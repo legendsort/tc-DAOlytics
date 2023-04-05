@@ -90,6 +90,11 @@ def member_activity_history(db_name, connection_string, channels, acc_names, dat
     all_disengaged = {}
     all_unpaused = {}
     all_returned = {}
+    ## TODO: implement the analytics for these 4 variables below
+    all_dropped = {}
+    all_disengaged_were_newly_active = {}
+    all_disengaged_were_consistenly_active = {}
+    all_disengaged_were_vital = {}
 
     # # # checking if there is any past data and if so, load this data instead of creating new dicts
 
@@ -104,7 +109,11 @@ def member_activity_history(db_name, connection_string, channels, acc_names, dat
                        'all_unpaused',
                        'all_returned',
                        'all_new_active',
-                       'all_still_active'] 
+                       'all_still_active',
+                       'all_dropped',
+                       'all_disengaged_were_newly_active',
+                       'all_disengaged_were_consistenly_active',
+                       'all_disengaged_were_vital'] 
     
 
     ## past_activities_date is the data from past activities
@@ -120,8 +129,10 @@ def member_activity_history(db_name, connection_string, channels, acc_names, dat
     ## if in past there was an activity, we'll update the dictionaries
     if past_activities_data != {}:
         (all_joined, all_consistent, all_vital, all_active, all_connected,
-            all_paused, all_new_disengaged, all_disengaged, all_unpaused,
-            all_returned, all_new_active, all_still_active) = update_activities(past_activities=past_activities_data,
+        all_paused, all_new_disengaged, all_disengaged, all_unpaused,
+        all_returned, all_new_active, all_still_active, all_dropped,
+        all_disengaged_were_newly_active, all_disengaged_were_consistenly_active,
+        all_disengaged_were_vital) = update_activities(past_activities=past_activities_data,
                                                                                 activities_list=activity_names_list)
     
     ## if there was still a need to analyze some data in the range
@@ -173,11 +184,12 @@ def member_activity_history(db_name, connection_string, channels, acc_names, dat
             int_mat[np.diag_indices_from(int_mat)] = 0
 
             # assess engagement
-            [graph_out, all_joined, all_consistent, all_vital, all_active, all_connected, all_paused, all_new_disengaged,
-            all_disengaged, all_unpaused, all_returned, all_new_active, all_still_active] = assess_engagement(int_mat,
+            (graph_out, all_joined, all_consistent, all_vital, all_active, all_connected, all_paused, all_new_disengaged,
+            all_disengaged, all_unpaused, all_returned, all_new_active, all_still_active, all_dropped, 
+            all_disengaged_were_vital, all_disengaged_were_newly_active, all_disengaged_were_consistenly_active) = assess_engagement(int_mat,
             new_window_i, np.asarray(acc_names), act_param, window_param[0], all_joined, all_consistent, all_vital, all_active,
             all_connected, all_paused, all_new_disengaged, all_disengaged, all_unpaused, all_returned, all_new_active,
-            all_still_active)
+            all_still_active, all_dropped, all_disengaged_were_vital, all_disengaged_were_newly_active, all_disengaged_were_consistenly_active)
 
             # make empty dict for node attributes
             node_att = {}
@@ -211,6 +223,11 @@ def member_activity_history(db_name, connection_string, channels, acc_names, dat
     activity_dict["all_returned"] = all_returned
     activity_dict["all_new_active"] = all_new_active
     activity_dict["all_still_active"] = all_still_active
+    activity_dict["all_dropped"] = all_dropped
+    activity_dict["all_disengaged_were_vital"] = all_disengaged_were_vital
+    activity_dict["all_disengaged_were_newly_active"] = all_disengaged_were_newly_active
+    activity_dict["all_disengaged_were_consistenly_active"] = all_disengaged_were_consistenly_active
+
 
 
     

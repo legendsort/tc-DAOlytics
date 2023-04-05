@@ -80,11 +80,6 @@ def check_past_history(db_access,
     ## getting a list of returned data
     past_data = list(cursor)
 
-    # if len(past_data) > 1:
-    #     raise NotImplementedError("""The corresponding label for now should have 1 document!
-    #                                 The analysis implemented now just can support 1 document!""")
-
-
     ## if any past data was available in DB
     if past_data != []:
         if verbose: 

@@ -22,7 +22,8 @@ from collections import Counter
 
 def assess_engagement(int_mat, w_i, acc_names, act_param, WINDOW_D, all_arrived, all_consistent,  all_vital,
                       all_active, all_connected, all_paused, all_new_disengaged, all_disengaged, all_unpaused, 
-                      all_returned, all_new_active, all_still_active):
+                      all_returned, all_new_active, all_still_active, all_dropped, all_disengaged_were_vital, 
+                      all_disengaged_were_newly_active, all_disengaged_were_consistenly_active):
     """
     Assess engagment levels for all active members in a time period
 
@@ -87,8 +88,9 @@ def assess_engagement(int_mat, w_i, acc_names, act_param, WINDOW_D, all_arrived,
         all_active, w_i, WINDOW_D, act_param[2], all_new_active, all_unpaused, all_returned, all_paused,
         all_new_disengaged, all_disengaged)
 
-    return [graph, all_arrived, all_consistent, all_vital, all_active, all_connected, all_paused,
-            all_new_disengaged, all_disengaged, all_unpaused, all_returned, all_new_active, all_still_active]
+    return (graph, all_arrived, all_consistent, all_vital, all_active, all_connected, all_paused,
+            all_new_disengaged, all_disengaged, all_unpaused, all_returned, all_new_active, all_still_active,
+            all_dropped, all_disengaged_were_vital, all_disengaged_were_newly_active, all_disengaged_were_consistenly_active)
 
 
 # # # # # nested functions # # # # #
