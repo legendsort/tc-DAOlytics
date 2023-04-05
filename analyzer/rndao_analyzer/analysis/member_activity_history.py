@@ -241,7 +241,7 @@ def store_based_date(start_date, max_days_after, all_activities):
         and values are representing the analytics after the start_date
     """
     ## the data converted to multiple db records
-    all_data_records = {}
+    all_data_records = []
 
     for day_index in range(max_days_after):
         analytics_date = start_date + timedelta(days=day_index)
@@ -258,7 +258,8 @@ def store_based_date(start_date, max_days_after, all_activities):
             else:
                 data_record[activity] = []
         
-        all_data_records[str(day_index)] = data_record
+        # all_data_records[str(day_index)] = data_record
+        all_data_records.append(data_record)
     
     return all_data_records
 
