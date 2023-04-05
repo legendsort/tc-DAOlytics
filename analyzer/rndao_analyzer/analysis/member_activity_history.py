@@ -10,7 +10,7 @@
 
 import numpy as np
 import networkx as nx
-from datetime import datetime
+from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 
 from compute_interaction_matrix_discord import compute_interaction_matrix_discord
@@ -93,36 +93,47 @@ def member_activity_history(db_name, connection_string, channels, acc_names, dat
 
     # # # checking if there is any past data and if so, load this data instead of creating new dicts
 
-    activity_names_list = ['all_arrived', 
-                       'all_consistent',
-                       'all_vital',
-                       'all_active',
-                       'all_connected',
-                       'all_paused',
-                       'all_new_disengaged',
-                       'all_disengaged',
-                       'all_unpaused',
-                       'all_returned',
-                       'all_new_active',
-                       'all_still_active'] 
+    # activity_names_list = ['all_arrived', 
+    #                    'all_consistent',
+    #                    'all_vital',
+    #                    'all_active',
+    #                    'all_connected',
+    #                    'all_paused',
+    #                    'all_new_disengaged',
+    #                    'all_disengaged',
+    #                    'all_unpaused',
+    #                    'all_returned',
+    #                    'all_new_active',
+    #                    'all_still_active'] 
     
 
-    ## past_activities_date is the data from past activities
-    ## new_date_range is defined to change the date_range with past data loaded
-    ## starting_key is the starting key of actuall analysis 
-    past_activities_data, new_date_range, starting_key = check_past_history(db_access=db_access, 
-                       date_range=date_range,
-                       ## retrive these activities if available
-                       activity_names_list=activity_names_list,
-                       TABLE_NAME='memberactivities'
-                       )
+    # ## past_activities_date is the data from past activities
+    # ## new_date_range is defined to change the date_range with past data loaded
+    # ## starting_key is the starting key of actuall analysis 
+    # past_activities_data, new_date_range, starting_key = check_past_history(db_access=db_access, 
+    #                    date_range=date_range,
+    #                    ## retrive these activities if available
+    #                    activity_names_list=activity_names_list,
+    #                    TABLE_NAME='memberactivities'
+    #                    )
     
-    ## if in past there was an activity, we'll update the dictionaries
-    if past_activities_data != {}:
-        (all_arrived, all_consistent, all_vital, all_active, all_connected,
-            all_paused, all_new_disengaged, all_disengaged, all_unpaused,
-            all_returned, all_new_active, all_still_active) = update_activities(past_activities=past_activities_data,
-                                                                                activities_list=activity_names_list)
+    ## TODO: Update the past data retreving with the new mongoDB schema
+
+    date_format = '%y/%m/%d'
+    date_range_start = datetime.strptime(date_range[0], date_format)
+    date_range_end = datetime.strptime(date_range[1], date_format)
+
+    new_date_range = [date_range_start, date_range_end]
+    starting_key = 0
+
+
+
+    # ## if in past there was an activity, we'll update the dictionaries
+    # if past_activities_data != {}:
+    #     (all_arrived, all_consistent, all_vital, all_active, all_connected,
+    #         all_paused, all_new_disengaged, all_disengaged, all_unpaused,
+    #         all_returned, all_new_active, all_still_active) = update_activities(past_activities=past_activities_data,
+    #                                                                             activities_list=activity_names_list)
     
     ## if there was still a need to analyze some data in the range
     if new_date_range != []:
@@ -142,7 +153,8 @@ def member_activity_history(db_name, connection_string, channels, acc_names, dat
         # # # ACTUAL ANALYSIS # # #
 
         # for every window index
-        for w_i in range(int(np.floor(last_start.days / window_param[1]) + 1)):
+        max_range = int(np.floor(last_start.days / window_param[1]) + 1)
+        for w_i in range(max_range):
             
             ## update the window index with the data available
             new_window_i = w_i + starting_key
@@ -185,7 +197,7 @@ def member_activity_history(db_name, connection_string, channels, acc_names, dat
             nx.set_node_attributes(graph_out, node_att, "acc_name")
 
             # store results in dictionary
-            network_dict[last_date_w] = graph_out       
+            network_dict[last_date_w] = graph_out
 
 
     # # # STORE RESULTS IN FINAL DICTIONARY # # #
@@ -207,7 +219,48 @@ def member_activity_history(db_name, connection_string, channels, acc_names, dat
     activity_dict["all_new_active"] = all_new_active
     activity_dict["all_still_active"] = all_still_active
 
-    return [network_dict, activity_dict]
+    activity_dict_per_date = store_based_date(start_date=start_dt,
+                     max_days_after=max_range,
+                     all_activities=activity_dict)
+
+    return [network_dict, activity_dict_per_date]
+
+def store_based_date(start_date, max_days_after, all_activities):
+    """
+    store the activities (`all_*`) in a dictionary based on their dates
+
+    Parameters:
+    -------------
+    start_date : datetime 
+        datetime object showing the start date of analysis
+    max_days_after : int
+        the integer value representing the last date of analysis
+    all_activities : dictionary
+        the `all_*` activities dictionary
+        each key does have an activity, `all_arrived`, `all_consistent`, etc
+        and values are representing the analytics after the start_date
+    """
+    ## the data converted to multiple db records
+    all_data_records = {}
+
+    for day_index in range(max_days_after):
+        analytics_date = start_date + timedelta(days=day_index)
+        ## saving the data of a record 
+        data_record = {}
+        data_record['date'] = analytics_date
+
+        ## analytics that were done in that date
+        for activity in all_activities.keys():
+            ## if an analytics for that day was available
+            if str(day_index) in all_activities[activity].keys():
+                data_record[activity] = list(all_activities[activity][str(day_index)])
+            ## if there was no analytics in that day
+            else:
+                data_record[activity] = []
+        
+        all_data_records[day_index] = data_record
+    
+    return all_data_records
 
 def update_activities(past_activities, activities_list):
     """
