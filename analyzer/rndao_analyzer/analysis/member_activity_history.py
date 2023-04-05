@@ -107,33 +107,22 @@ def member_activity_history(db_name, connection_string, channels, acc_names, dat
                        'all_still_active'] 
     
 
-    # ## past_activities_date is the data from past activities
-    # ## new_date_range is defined to change the date_range with past data loaded
-    # ## starting_key is the starting key of actuall analysis 
-    # past_activities_data, new_date_range, starting_key = check_past_history(db_access=db_access, 
-    #                    date_range=date_range,
-    #                    ## retrive these activities if available
-    #                    activity_names_list=activity_names_list,
-    #                    TABLE_NAME='memberactivities'
-    #                    )
-    
-    ## TODO: Update the past data retreving with the new mongoDB schema
+    ## past_activities_date is the data from past activities
+    ## new_date_range is defined to change the date_range with past data loaded
+    ## starting_key is the starting key of actuall analysis 
+    past_activities_data, new_date_range, starting_key = check_past_history(db_access=db_access, 
+                       date_range=date_range,
+                       ## retrive these activities if available
+                       activity_names_list=activity_names_list,
+                       TABLE_NAME='memberactivities'
+                       )
 
-    date_format = '%y/%m/%d'
-    date_range_start = datetime.strptime(date_range[0], date_format)
-    date_range_end = datetime.strptime(date_range[1], date_format)
-
-    new_date_range = [date_range_start, date_range_end]
-    starting_key = 0
-
-
-
-    # ## if in past there was an activity, we'll update the dictionaries
-    # if past_activities_data != {}:
-    #     (all_arrived, all_consistent, all_vital, all_active, all_connected,
-    #         all_paused, all_new_disengaged, all_disengaged, all_unpaused,
-    #         all_returned, all_new_active, all_still_active) = update_activities(past_activities=past_activities_data,
-    #                                                                             activities_list=activity_names_list)
+    ## if in past there was an activity, we'll update the dictionaries
+    if past_activities_data != {}:
+        (all_arrived, all_consistent, all_vital, all_active, all_connected,
+            all_paused, all_new_disengaged, all_disengaged, all_unpaused,
+            all_returned, all_new_active, all_still_active) = update_activities(past_activities=past_activities_data,
+                                                                                activities_list=activity_names_list)
     
     ## if there was still a need to analyze some data in the range
     if new_date_range != []:
@@ -157,7 +146,8 @@ def member_activity_history(db_name, connection_string, channels, acc_names, dat
         for w_i in range(max_range):
             
             ## update the window index with the data available
-            new_window_i = w_i + starting_key
+            ## starting_key plus one should be used since our new data should continue the keys 
+            new_window_i = w_i + (starting_key + 1)
             # print("window {} of {}".format(new_window_i + 1, int(np.floor(last_start.days / window_param[1]) + 1)))
 
             # find last date of window
