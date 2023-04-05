@@ -209,8 +209,10 @@ def member_activity_history(db_name, connection_string, channels, acc_names, dat
     activity_dict["all_new_active"] = all_new_active
     activity_dict["all_still_active"] = all_still_active
 
-    activity_dict_per_date = store_based_date(start_date=start_dt,
-                     max_days_after=max_range,
+
+    
+    activity_dict_per_date = store_based_date(start_date=datetime.strptime(date_range[0], '%y/%m/%d'),
+                     max_days_after=starting_key + max_range,
                      all_activities=activity_dict)
 
     return [network_dict, activity_dict_per_date]
