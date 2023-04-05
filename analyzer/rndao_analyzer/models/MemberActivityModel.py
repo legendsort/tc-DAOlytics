@@ -18,56 +18,104 @@ class MemberActivityModel(BaseModel):
             "$jsonSchema": {
                 "bsonType": "object",
                 "properties": {
-                    "first_end_date": {
+                    "date": {
                         "bsonType": "date",
                     },
                     "all_active": {
-                        "bsonType": "object",
+                        "bsonType": "array",
+                        "items": {
+                            "bsonType": "string"
+                        }
                     },
                     "all_consistent": {
-                        "bsonType": "object",
+                        "bsonType": "array",
+                        "items": {
+                            "bsonType": "string"
+                        }
                     },
                     "all_vital": {
-                        "bsonType": "object",
+                        "bsonType": "array",
+                        "items": {
+                            "bsonType": "string"
+                        }
                     },
                     "all_connected": {
-                        "bsonType": "object",
+                        "bsonType": "array",
+                        "items": {
+                            "bsonType": "string"
+                        }
                     },
                     "all_paused": {
-                        "bsonType": "object",
+                        "bsonType": "array",
+                        "items": {
+                            "bsonType": "string"
+                        }
                     },
                     "all_new_disengaged": {
-                        "bsonType": "object",
+                        "bsonType": "array",
+                        "items": {
+                            "bsonType": "string"
+                        }
                     },
                     "all_disengaged": {
-                        "bsonType": "object",
+                        "bsonType": "array",
+                        "items": {
+                            "bsonType": "string"
+                        }
                     },
                     "all_unpaused": {
-                        "bsonType": "object",
+                        "bsonType": "array",
+                        "items": {
+                            "bsonType": "string"
+                        }
                     },
                     "all_returned": {
-                        "bsonType": "object",
+                        "bsonType": "array",
+                        "items": {
+                            "bsonType": "string"
+                        }
                     },
                     "all_new_active": {
-                        "bsonType": "object",
+                        "bsonType": "array",
+                        "items": {
+                            "bsonType": "string"
+                        }
                     },
                     "all_still_active": {
-                        "bsonType": "object",
+                        "bsonType": "array",
+                        "items": {
+                            "bsonType": "string"
+                        }
                     },
                     "all_dropped": {
-                        "bsonType": "object",
+                        "bsonType": "array",
+                        "items": {
+                            "bsonType": "string"
+                        }
                     },
                     "all_joined": {
-                        "bsonType": "object",
+                        "bsonType": "array",
+                        "items": {
+                            "bsonType": "string"
+                        }
                     },
                     "all_disengaged_were_newly_active": {
-                        "bsonType": "object",
+                        "bsonType": "array",
+                        "items": {
+                            "bsonType": "string"
+                        }
                     },
                     "all_disengaged_were_consistenly_active": {
-                        "bsonType": "object",
+                        "bsonType": "array",
+                        "items": {
+                            "bsonType": "string"
+                        }
                     },
                     "all_disengaged_were_vital": {
-                        "bsonType": "object",
+                        "bsonType": "array",
+                        "items": {
+                            "bsonType": "string"
+                        }
                     },
                 }
             }

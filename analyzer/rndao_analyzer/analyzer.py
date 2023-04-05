@@ -21,7 +21,6 @@ from analysis.activity_hourly import activity_hourly
 from analysis.member_activity_history import member_activity_history
 from dotenv import load_dotenv
 
-
 class RnDaoAnalyzer:
     """
     RnDaoAnalyzer
@@ -84,9 +83,7 @@ class RnDaoAnalyzer:
 
         logging.info(f"Creating heatmaps for {guilds}")
         for guild in guilds:
-            print("A--->")
-            self.analysis_heatmap(guild)
-            print("B---->")
+            # self.analysis_heatmap(guild)
             self.analysis_member_activity(guild)
 
     def get_guilds(self):
@@ -212,30 +209,25 @@ class RnDaoAnalyzer:
 
         date_range = [first_date, last_date]
         # get all users during date_range
-        all_users = self.get_all_users(guild, date_range, rawinfo_c)
+        # all_users = self.get_all_users(guild, date_range, rawinfo_c)
         # logging.info(all_users)
         # change format like 23/03/27
         date_range = [dt.strftime("%y/%m/%d") for dt in date_range]
         # logging.info(date_range)
         # get member activity history
-        network, activity = member_activity_history(
-            guild, CONNECTION_STRING, channels, all_users, date_range, window, action)
-        # logging.info(activity)
-        for key in activity.keys():
-            if isinstance(activity[key], dict):
-                for k in activity[key].keys():
-                    activity[key][k] = list(activity[key][k])
-            else:
-                activity[key] = list(activity[key])
+        # network, activity = member_activity_history(
+        #     guild, CONNECTION_STRING, channels, all_users, date_range, window, action)
+        # # logging.info(activity)
+        # for key in activity.keys():
+        #     if isinstance(activity[key], dict):
+        #         for k in activity[key].keys():
+        #             activity[key][k] = list(activity[key][k])
+        #     else:
+        #         activity[key] = list(activity[key])
 
-        if first_time:
             # create member activity document
-            activity["first_end_date"] = first_date + timedelta(days=window[0] - 1)
-            # logging.info(activity)
-            # insert into database
-            member_activity_c.insert_one(activity)
-        else:
-            logging.info(activity)
+        # for activity in sample_activity:
+        #     member_activity_c.insert_one(activity)
         return True
 
     def analysis_heatmap(self, guild):

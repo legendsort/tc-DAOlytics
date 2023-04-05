@@ -197,7 +197,8 @@ if __name__ == "__main__":
     VITAL_T_THR = 4  # time period to assess for vital							    Default = 4
     VITAL_O_THR = 3  # times to be connected within VITAL_T_THR to be vital		    Default = 3
     STILL_T_THR = 3  # time period to assess for still active					    Default = 3
-    STILL_O_THR = 2  # times to be active within STILL_T_THR to be still active	    Default = 2
+    STILL_O_THR = 2  # times to be active within STILL_T_THR to be still active	    Default = 2 
+    # [1, 1, 1, 4, 3, 5, 5, 4, 3, 3, 2]
 
     ## call function
     data_out = member_activity_history(DB_NAME, CONNECTION_STRING, channels, acc_names, date_range, [WINDOW_D, STEP_D],
