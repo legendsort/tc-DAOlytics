@@ -93,18 +93,18 @@ def member_activity_history(db_name, connection_string, channels, acc_names, dat
 
     # # # checking if there is any past data and if so, load this data instead of creating new dicts
 
-    # activity_names_list = ['all_arrived', 
-    #                    'all_consistent',
-    #                    'all_vital',
-    #                    'all_active',
-    #                    'all_connected',
-    #                    'all_paused',
-    #                    'all_new_disengaged',
-    #                    'all_disengaged',
-    #                    'all_unpaused',
-    #                    'all_returned',
-    #                    'all_new_active',
-    #                    'all_still_active'] 
+    activity_names_list = ['all_arrived', 
+                       'all_consistent',
+                       'all_vital',
+                       'all_active',
+                       'all_connected',
+                       'all_paused',
+                       'all_new_disengaged',
+                       'all_disengaged',
+                       'all_unpaused',
+                       'all_returned',
+                       'all_new_active',
+                       'all_still_active'] 
     
 
     # ## past_activities_date is the data from past activities
@@ -247,7 +247,7 @@ def store_based_date(start_date, max_days_after, all_activities):
         analytics_date = start_date + timedelta(days=day_index)
         ## saving the data of a record 
         data_record = {}
-        data_record['date'] = analytics_date
+        data_record['date'] = analytics_date.isoformat()
 
         ## analytics that were done in that date
         for activity in all_activities.keys():
@@ -258,7 +258,7 @@ def store_based_date(start_date, max_days_after, all_activities):
             else:
                 data_record[activity] = []
         
-        all_data_records[day_index] = data_record
+        all_data_records[str(day_index)] = data_record
     
     return all_data_records
 
