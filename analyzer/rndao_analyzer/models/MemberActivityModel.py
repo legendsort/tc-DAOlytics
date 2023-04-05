@@ -120,13 +120,14 @@ class MemberActivityModel(BaseModel):
                 }
             }
         }
+
     def get_last_date(self):
         """
         Gets the date of the last document
         """
         try:
             date_str = self.database[self.collection_name].find().sort(
-                [("first_end_date", pymongo.DESCENDING)]).limit(1)[0]["first_end_date"]
+                [("date", pymongo.ASCENDING)]).limit(1)[0]["date"]
             date_obj = datetime.strptime(date_str, "%Y-%m-%d")
             return date_obj
         except Exception as e:

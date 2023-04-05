@@ -166,3 +166,7 @@ cython_debug/
 #
 # Emacs
 .org
+
+interactions/credentials.py
+interactions/temp.ipynb
+test.ipynb

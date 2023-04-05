@@ -83,7 +83,7 @@ class RnDaoAnalyzer:
 
         logging.info(f"Creating heatmaps for {guilds}")
         for guild in guilds:
-            # self.analysis_heatmap(guild)
+            self.analysis_heatmap(guild)
             self.analysis_member_activity(guild)
 
     def get_guilds(self):
@@ -191,43 +191,45 @@ class RnDaoAnalyzer:
         channels, window, action = setting["selectedChannels"], setting["window"], setting["action"]
         channels = list(map(lambda x: x["channelId"], channels))
 
-        # change window object to array
-
         # get date range to be analyzed
-        last_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
 
-        first_time = False
         if member_activity_c.count() == 0:
             """This is the first analysis"""
-            first_time = True
             first_date = rawinfo_c.get_first_date().replace(
                 hour=0, minute=0, second=0, microsecond=0)
+            last_date = today - timedelta(days=1)
         else:
             """This is a daily analysis"""
+            last_date = member_activity_c.get_last_date().replace(
+                hour=0, minute=0, second=0, microsecond=0)
+            
             first_date = (last_date - timedelta(days=window[0]-1)).replace(
                 hour=0, minute=0, second=0, microsecond=0)
 
-        date_range = [first_date, last_date]
-        # get all users during date_range
-        # all_users = self.get_all_users(guild, date_range, rawinfo_c)
-        # logging.info(all_users)
-        # change format like 23/03/27
-        date_range = [dt.strftime("%y/%m/%d") for dt in date_range]
-        # logging.info(date_range)
-        # get member activity history
-        # network, activity = member_activity_history(
-        #     guild, CONNECTION_STRING, channels, all_users, date_range, window, action)
-        # # logging.info(activity)
-        # for key in activity.keys():
-        #     if isinstance(activity[key], dict):
-        #         for k in activity[key].keys():
-        #             activity[key][k] = list(activity[key][k])
-        #     else:
-        #         activity[key] = list(activity[key])
-
-            # create member activity document
-        # for activity in sample_activity:
-        #     member_activity_c.insert_one(activity)
+        while last_date.astimezone() < today.astimezone():
+            date_range = [first_date, last_date]
+            logging.info(date_range)
+            # change format like 23/03/27
+            # get all users during date_range
+            all_users = self.get_all_users(guild, date_range, rawinfo_c)
+            logging.info(all_users)
+            date_range = [dt.strftime("%y/%m/%d") for dt in date_range]
+            logging.info(date_range)
+            network, activity = member_activity_history(guild, CONNECTION_STRING, channels, all_users, date_range, window, action)
+            logging.info(activity)
+            # for activity in activity:
+            #     member_activity_c.insert_one(activity)
+            # for key in activity.keys():
+            #     if isinstance(activity[key], dict):
+            #         for k in activity[key].keys():
+            #             activity[key][k] = list(activity[key][k])
+            #     else:
+            #         activity[key] = list(activity[key])
+            
+            first_date += timedelta(days = 1)
+            last_date += timedelta(days = 1)
+        # create member activity document
         return True
 
     def analysis_heatmap(self, guild):
