@@ -193,7 +193,7 @@ def convert_back_to_old_schema(retrieved_data):
     activity_dict = {}
 
     # store results in dictionary
-    activity_dict["all_arrived"] = {}
+    activity_dict["all_joined"] = {}
     activity_dict["all_consistent"] = {}
     activity_dict["all_vital"] = {}
     activity_dict["all_active"] = {}

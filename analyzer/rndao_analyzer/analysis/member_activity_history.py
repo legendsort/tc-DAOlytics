@@ -78,7 +78,7 @@ def member_activity_history(db_name, connection_string, channels, acc_names, dat
     network_dict = {}
 
     # initiate result dictionaries for engagement types
-    all_arrived = {}
+    all_joined = {}
     all_consistent = {}
     all_vital = {}
     all_active = {}
@@ -93,7 +93,7 @@ def member_activity_history(db_name, connection_string, channels, acc_names, dat
 
     # # # checking if there is any past data and if so, load this data instead of creating new dicts
 
-    activity_names_list = ['all_arrived', 
+    activity_names_list = ['all_joined', 
                        'all_consistent',
                        'all_vital',
                        'all_active',
@@ -119,7 +119,7 @@ def member_activity_history(db_name, connection_string, channels, acc_names, dat
 
     ## if in past there was an activity, we'll update the dictionaries
     if past_activities_data != {}:
-        (all_arrived, all_consistent, all_vital, all_active, all_connected,
+        (all_joined, all_consistent, all_vital, all_active, all_connected,
             all_paused, all_new_disengaged, all_disengaged, all_unpaused,
             all_returned, all_new_active, all_still_active) = update_activities(past_activities=past_activities_data,
                                                                                 activities_list=activity_names_list)
@@ -146,8 +146,11 @@ def member_activity_history(db_name, connection_string, channels, acc_names, dat
         for w_i in range(max_range):
             
             ## update the window index with the data available
-            ## starting_key plus one should be used since our new data should continue the keys 
-            new_window_i = w_i + (starting_key + 1)
+            if starting_key != 0:
+                ## starting_key plus one should be used since our new data should continue the keys 
+                new_window_i = w_i + (starting_key + 1)
+            else:
+                new_window_i = w_i
             # print("window {} of {}".format(new_window_i + 1, int(np.floor(last_start.days / window_param[1]) + 1)))
 
             # find last date of window
@@ -170,9 +173,9 @@ def member_activity_history(db_name, connection_string, channels, acc_names, dat
             int_mat[np.diag_indices_from(int_mat)] = 0
 
             # assess engagement
-            [graph_out, all_arrived, all_consistent, all_vital, all_active, all_connected, all_paused, all_new_disengaged,
+            [graph_out, all_joined, all_consistent, all_vital, all_active, all_connected, all_paused, all_new_disengaged,
             all_disengaged, all_unpaused, all_returned, all_new_active, all_still_active] = assess_engagement(int_mat,
-            new_window_i, np.asarray(acc_names), act_param, window_param[0], all_arrived, all_consistent, all_vital, all_active,
+            new_window_i, np.asarray(acc_names), act_param, window_param[0], all_joined, all_consistent, all_vital, all_active,
             all_connected, all_paused, all_new_disengaged, all_disengaged, all_unpaused, all_returned, all_new_active,
             all_still_active)
 
@@ -196,7 +199,7 @@ def member_activity_history(db_name, connection_string, channels, acc_names, dat
     activity_dict = {}
 
     # store results in dictionary
-    activity_dict["all_arrived"] = all_arrived
+    activity_dict["all_joined"] = all_joined
     activity_dict["all_consistent"] = all_consistent
     activity_dict["all_vital"] = all_vital
     activity_dict["all_active"] = all_active
@@ -229,7 +232,7 @@ def store_based_date(start_date, max_days_after, all_activities):
         the integer value representing the last date of analysis
     all_activities : dictionary
         the `all_*` activities dictionary
-        each key does have an activity, `all_arrived`, `all_consistent`, etc
+        each key does have an activity, `all_joined`, `all_consistent`, etc
         and values are representing the analytics after the start_date
     """
     ## the data converted to multiple db records
