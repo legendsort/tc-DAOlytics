@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import logging
 import pymongo
-import datetime
+from datetime import datetime
 
 from models.BaseModel import BaseModel
 
@@ -127,9 +127,10 @@ class MemberActivityModel(BaseModel):
         """
         try:
             date_str = self.database[self.collection_name].find().sort(
-                [("date", pymongo.ASCENDING)]).limit(1)[0]["date"]
-            date_obj = datetime.strptime(date_str, "%Y-%m-%d")
-            return date_obj
+                [("date", pymongo.DESCENDING)]).limit(1)[0]["date"]
+            date_format = '%Y-%m-%dT%H:%M:%S'
+            date_object = datetime.strptime(date_str, date_format)
+            return date_object
         except Exception as e:
             print(e)
             return None

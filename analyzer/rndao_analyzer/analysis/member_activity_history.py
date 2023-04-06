@@ -13,11 +13,11 @@ import networkx as nx
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 
-from compute_interaction_matrix_discord import compute_interaction_matrix_discord
-from analytics_interactions_script import DB_access
-from assess_engagement import assess_engagement
-from member_activity_history_past import check_past_history
-from network_graph import make_graph_list_query
+from analysis.compute_interaction_matrix_discord import compute_interaction_matrix_discord
+from analysis.analytics_interactions_script import DB_access
+from analysis.assess_engagement import assess_engagement
+from analysis.member_activity_history_past import check_past_history
+from analysis.network_graph import make_graph_list_query
 from neo4j import GraphDatabase
 
 

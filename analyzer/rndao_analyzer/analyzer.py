@@ -21,6 +21,7 @@ from analysis.activity_hourly import activity_hourly
 from analysis.member_activity_history import member_activity_history
 from dotenv import load_dotenv
 
+
 class RnDaoAnalyzer:
     """
     RnDaoAnalyzer
@@ -201,34 +202,24 @@ class RnDaoAnalyzer:
             last_date = today - timedelta(days=1)
         else:
             """This is a daily analysis"""
-            last_date = member_activity_c.get_last_date().replace(
+            first_date = member_activity_c.get_last_date().replace(
                 hour=0, minute=0, second=0, microsecond=0)
-            
-            first_date = (last_date - timedelta(days=window[0]-1)).replace(
-                hour=0, minute=0, second=0, microsecond=0)
+            first_date = first_date + timedelta(days=1)
+            last_date = first_date + timedelta(days=6)
 
         while last_date.astimezone() < today.astimezone():
             date_range = [first_date, last_date]
-            logging.info(date_range)
-            # change format like 23/03/27
             # get all users during date_range
             all_users = self.get_all_users(guild, date_range, rawinfo_c)
-            logging.info(all_users)
+            # change format like 23/03/27
             date_range = [dt.strftime("%y/%m/%d") for dt in date_range]
-            logging.info(date_range)
-            network, activity = member_activity_history(guild, CONNECTION_STRING, channels, all_users, date_range, window, action)
-            logging.info(activity)
-            # for activity in activity:
-            #     member_activity_c.insert_one(activity)
-            # for key in activity.keys():
-            #     if isinstance(activity[key], dict):
-            #         for k in activity[key].keys():
-            #             activity[key][k] = list(activity[key][k])
-            #     else:
-            #         activity[key] = list(activity[key])
-            
-            first_date += timedelta(days = 1)
-            last_date += timedelta(days = 1)
+            network, activities = member_activity_history(
+                guild, CONNECTION_STRING, channels, all_users, date_range, window, action)
+            for activity in activities:
+                member_activity_c.insert_one(activity)
+
+            first_date += timedelta(days=1)
+            last_date += timedelta(days=1)
         # create member activity document
         return True
 
